@@ -1,0 +1,28 @@
+{
+    "desiredCapabilities": {
+        "app": "/home/build/0/o2/cache/Mein_o2.apk",
+        "appActivity": "canvasm.myo2.SplashActivity",
+        "appPackage": "canvasm.myo2",
+        "newCommandTimeout": 120,
+        "platformVersion": "9",
+        "automationName": "UIAutomator2",
+        "platformName": "Android",
+        "deviceName": "emulator2",
+        "avd": "emulator2"
+    },
+    "capabilities": {
+        "firstMatch": [
+            {
+                "appium:app": "/home/build/0/o2/cache/Mein_o2.apk",
+                "appium:appActivity": "canvasm.myo2.SplashActivity",
+                "appium:appPackage": "canvasm.myo2",
+                "appium:automationName": "UIAutomator2",
+                "appium:avd": "emulator2",
+                "appium:deviceName": "emulator2",
+                "appium:newCommandTimeout": 120,
+                "platformName": "android",
+                "appium:platformVersion": "9"
+            }
+        ]
+    }
+}

@@ -1,0 +1,632 @@
+#!/bin/bash
+# weaves
+# This is the super-script. It provides a wrapper around other scripts.
+
+M_VER=1.1
+M_DESC="new e_sys definition and usage"
+
+# It is installed as part of the GIT "site" Illustrations repository. And it is re-used repeatedly
+# within the Illustrations GIT "user" repository.
+
+# The installations of "site" and "user" are two modes. As the first installation from "site", as the 
+# later installation from "user". For both, you need to have stow(8)
+
+# Both need to have a share/site/ sub-directory named after the hostname of the machine.
+# A link is usually enough to get started.
+
+# The first installation needs some preparation.
+# The user that does the installation needs to be a member of staff and all the sub-directories
+# of /usr/local are writable by staff.
+
+# Then from the site directory, you need to be in the top-level directory of "site".
+
+# And then invoke m_ with the home directory re-assigned
+#   site$ ( export HOME=$PWD; bin/m_ stow )
+#   site$ ( export HOME=$PWD; bin/m_ -m glenda stow )
+
+# For a user installation, install into an NFS shared directory across all the hosts on the cluster.
+# From the top-level directory
+#   user$ m_ -d $PWD stow
+
+# Usually, you can use install a meta-script utility like this
+
+# user/bin$ ln -s $(which m_) hd_
+# And then you can add functions in user/etc/hd_.sh
+# Definitions in user/etc/hd_.def or user/share/site/hostname/hd_.def
+
+# In a local directory, you would do this 
+#  $ ln -s $(which m_) bldr
+#  $ cat > bldr.sh
+#  $ cat > bldr.def
+# and populate .sh and .def as needed.
+
+# To see what can be accessed the sub-methods in 
+#  $ m_ -h this0 
+
+# See d_this0 
+
+## This helps if the user doesn't give a command.
+d_ () {
+    h_help
+}
+
+d_optionate () {
+    local tfile=$(mktemp)
+    test -n "$d_options" || return $tfile
+
+    ( printf "set -a\n"
+      export IFS=","
+      for i in $d_options
+      do
+          printf "%s\n" $i
+      done 
+      printf "set +a\n" ) > $tfile
+    echo $tfile
+}
+
+set -a
+
+if [ "${SHELLOPTS/xtrace/xtrace_}" != "$SHELLOPTS" ]
+then
+    xtrace0="yes"
+    echo running: $0
+    xtrace="yes"
+fi
+
+## Operational mode
+
+prog=$(basename $0)
+let e_sys=1
+# default is local and score is 1.
+if [ ${prog%_} != $prog ]
+then
+    let e_sys=0                 # when a system script.
+fi
+
+f_echo () {
+    ## only if te file is non-empty and not a directory
+    # don't resolve the link either.
+	  if [ -s "$1" -a ! -d "$1" ]
+	  then
+        echo "$1"
+	  fi
+}
+
+d_realpath0 () {
+    if [ -f "$1" ]
+    then
+	      local d0=$(d_realpath0 $(dirname "$1"))
+	      if [ -z "$d0" ]
+	      then
+	          return 1
+	      fi
+	      echo "${d0}/$(basename "$1")"
+	      return 0
+    fi
+
+    if [ ! -d "$1" ]
+    then
+	      echo ""
+	      return 1
+    fi
+
+    ( cd "$1" && pwd )
+}
+
+e_supporters () {
+    ## If path given test if sys
+    local t_ext
+    local t_path
+    local t_tag
+
+    # work out the basename from the invocation name.
+    # drop any extension
+    t_tag=${prog}
+
+    if [ $# -gt 0 ]
+    then
+	      t_ext=$1
+	      shift
+    fi
+
+    # Get a base path
+    if [ $# -gt 0 ]
+    then
+        t_path=$1
+    else
+        t_path=$(dirname $0)
+        if [ $e_sys -eq 0 ]
+        then
+            if [ -d $t_path/../etc -o -d $t_path/../share ]
+            then
+                t_path=$(d_realpath0 $t_path/..)
+            fi
+        fi
+    fi
+
+    if [ ! -d "$t_path" ]
+    then
+        return 2
+    fi
+
+    d_support=${t_tag}${t_ext}
+
+    if [ $e_sys -eq 0 ]
+    then
+        # If we are using a system layout.
+        f_echo "$t_path/etc/$d_support"
+        f_echo "$t_path/share/site/$d_machine/$d_support"
+        f_echo "$t_path/share/site/cluster/$d_support"
+    else
+        # Otherwise, just the local directory
+        f_echo "$t_path/$d_support"
+        f_echo "$t_path/$d_machine/$d_support"
+    fi
+}
+
+h_this0 () {
+    cat >&2 <<EOF
+ $prog ${FUNCNAME##h_} user|share|user0|script
+
+ $prog this0 support
+ $prog this0 support-def
+
+script - echo the final directory for the script - where this $prog script is run from.
+
+user0 - echo the first directory for the support script - that the $prog script will load.
+user|share - the last directory, the user's extension.
+
+Useful for script debugging, show the support files $prog .sh and .def file contents
+'support' lists all the files .sh and .def - size must be greater than zero
+'support-def' catenates the contents of just the .def files
+
+EOF
+}
+
+d_this0 () {
+    local e_cmd=$1
+    shift
+
+    case $e_cmd in
+	      support-def)
+	          echo ${D_SUP0[*]} | xargs -n1 | egrep '\.def$' | while read i
+	          do
+		            printf "\n\043 %s\n" $i
+                cat "$i"
+            done | egrep -v '^$'
+	          ;;
+
+	      support)
+	          echo ${D_SUP0[*]} | xargs -n1 
+	          ;;
+
+        supporters0)
+            if [ -n "$d_aflag" ]
+            then
+                # if the flag is set, just search for local scripts
+                unset e_sys
+            fi
+            e_supporters $*
+            $FUNCNAME support
+            ;;
+
+        supporters1)
+            set | egrep '^D_SUP0'
+            ;;
+
+        resolve)
+            # locate a file via readlink
+            local x0
+            : ${x0:="$1"}
+            : ${x0:="$0"}
+
+            cd "$(dirname "$(readlink -f "$x0")")"; echo $PWD
+            ;;
+
+	      sources)
+            ## this finds the sourced scripts
+            # it is set to locate the most derived script - the user's own.
+            : ${d_service:='.sh'}
+            local e_place="$"
+            if [ $d_count -gt 0 ]
+            then
+                let e_place=$d_count
+            fi
+            d_this0 support | egrep "${d_service}$" | sed -n "${e_place}p"| ( read d_file; $FUNCNAME resolve $d_file )
+            ;;
+
+        script)
+            ## this locates the top-level wrapper script.
+            $FUNCNAME resolve $0
+	          ;;
+
+        user0)
+	          local x0=$($FUNCNAME support | egrep '^'$HOME | sed -n '1p')
+	          dirname $(readlink -f $x0)
+	          ;;
+
+        user|share)
+	          local x0=$($FUNCNAME support | sed -n '$p')
+	          dirname $(readlink -f $x0)
+	          ;;
+
+    esac
+}
+
+: ${TMPDIR:=/tmp}
+export TMPDIR
+: ${TMP:=/tmp}
+export TMP
+
+declare -a D_SUP0
+
+Usage() {
+    local ex=$1
+    local h_cmd
+    shift
+
+    cat >&2 <<EOF
+Usage: $prog [<options>] command [<command options>]
+Function: execute localized command
+Options:         (Description)                 (Default)
+Flags
+  -n             No action mode: echo command  Take action
+  -v             Verbose mode: echo command    Don't echo anything
+  -q             Quiet mode: not echo command  Don't echo anything
+
+  -h             Help message                  no help given
+  -a             An arbitrary flag
+
+Arguments
+
+  -c             A count argument (numeric)    -1
+  -f             A file argument               None
+  -d             A directory argument          None
+  -s             A service argument            None 
+  -u             A username                    $d_user
+  -m             A machine                     $d_machine
+  -p             A port                        $d_port
+  -P             A password                    $d_passwd
+
+This is a utility script that acts as a wrapper for functions loaded from other files.
+It processes the command line and can load definitions - variables to be loaded into 
+the script's environment - use .def files.
+
+To install into /usr/local as group staff using stow(8) use this
+
+ site$ ( export HOME=$PWD/..; bin/m_ stow )
+
+after that  ln -s $(which m_) x0d_ or x0d 
+with ~/etc/x0d_.sh or ./x0d.sh
+and ~/etc/x0d_.def or ./x0d.def
+and ~/share/site/$HOSTNAME/x0d.def
+
+
+This is the principal "configuration list" command. It shows the files loaded by this command.
+
+ \$ $prog this0 support
+
+You should soft link to this script under another name to create another script
+wrapper that will load different files, viz.
+
+ \$ ln -s \$(which m_) builder
+
+and the builder script will look for builder.sh for function definitions and 
+builder.def for variables.
+
+There are two layouts it recognises.
+
+The default is a system layout, you put a link into a bin/ directory, and a .sh and .def
+in the neighbouring etc/ directory and .def in share/site/$HOSTNAME. So you would get
+ bin/x_ etc/x_.sh etc/x_.def share/site/host/x_.def
+
+The other local arrangement is to put the link into a directory and the .sh and .def
+ ./x_ ./x_.sh ./x_.def ./host/x_.def
+
+If you want to check (or show) a local definition, use the -a flag.
+
+The commands following may not work or work on your system. It's best to extend
+these scripts by adding functions with new names. Or, better still, use your 
+own script using the soft link method.
+
+This script has loaded these files in this order:
+
+EOF
+
+    echo ${D_SUP0[*]} | xargs -n1 printf "\t%s\n" 1>&2
+
+    printf "\nTo provide these commands: \n\n" 1>&2
+
+    : ${x_cols:=$COLUMNS}
+    : ${x_cols:=80}
+    typeset -i n_cols=${x_cols}-10
+
+    typeset -f | egrep '^d_' | sed -e 's/d_//g' -e 's/()//g' -e 's,{,,g' | xargs | fold -s --width="$n_cols" 1>&2
+
+    printf "\nSome commands provide help messages; these are they:\n" 1>&2
+
+    typeset -f | egrep '^d_' | sed -e 's/d_//g' -e 's,\([^ ]*\) .*,\1,g' | while read i ; do
+        h_cmd=h_${i}
+        if typeset -f $h_cmd > /dev/null 2>&1 
+        then
+            printf "\n" 1>&2
+            echo command: $i 1>&2
+            printf "\n" 1>&2
+            $h_cmd
+        fi 
+    done
+
+    printf "\nError Message:\n\t%s\n" "$@" 1>&2
+    exit $ex
+}
+
+h_help () {
+    Usage 1 "No command given"
+}
+
+# These are the default values. You could fill them in if you know what
+# you're doing, but beware: better not store a plain text password!
+: ${d_password:=""}
+: ${d_log:=""}
+: ${d_user:=$USER}           # Default: same user name as in *nix
+: ${d_user:=$LOGNAME}           # Default: same user name as in *nix
+: ${d_user:=`id -un`}
+
+nodo=""
+unset VERBOSE
+unset verbose
+
+# Usually the right perl is on the path, but #! scripts will
+# use the default for the host usually #!/usr/bin/perl
+# This allows you to call perl scripts using a wrapper function
+: ${PERL:=$(which perl)}
+: ${AWK:=$(which gawk)}
+
+#: ${d_log:=""}
+#: ${d_dir:=""}
+#: ${d_file:=""}
+#: ${d_options:=""}
+: ${d_machine:=$HOSTNAME}
+#: ${d_service:=""}
+
+typeset -i d_count=0
+
+d_args="$*"
+
+while getopts P:ahqnvxd:f:o:l:u:p:m:c:s: c
+do
+    case $c in
+        h) # be [h]elp
+            d_help="yes"
+            ;;
+        x) # be [x]trace
+            xtrace="yes"
+            set -x
+            ;;
+        v) # be [v]erbose and display what's going on
+            unset d_quiet
+            VERBOSE="yes"
+            verbose="/dev/stderr"
+            ;;
+        q) # be [v]erbose and display what's going on
+            d_quiet="yes"
+            unset VERBOSE
+            verbose="/dev/null"
+            ;;
+
+        a) # be [n]o action and echo commands rather than execute
+            d_aflag="yes"
+            ;;
+
+        n) # be [n]o action and echo commands rather than execute
+            nodo="echo "
+            ;;
+
+        o) d_options="$OPTARG"
+           ;;
+
+        r) # specify [p]ort file
+            d_port="$OPTARG"
+            ;;
+        l) # specify [l]og file
+            d_log="$OPTARG"
+            ;;
+        d) # specify [d]irectory
+            d_dir="$OPTARG"
+            ;;
+        f) # specify [f]file 
+            d_file="$OPTARG"
+            ;;
+        s) # service
+            d_service="$OPTARG"
+            ;;
+        u) # specify [u]sername for connection
+            d_user="$OPTARG"
+            ;;
+        p) # specify port to use
+            d_port="$OPTARG"
+            ;;
+
+        P) # specify pass[w]ord to use
+            d_password="$OPTARG"
+            ;;
+
+        c) # specify [c]ount of number
+            let d_count="$OPTARG"
+            ;;
+
+        m) # specify a [m]achine to use
+            d_machine=$OPTARG
+            ;;
+
+        '?') # any other switch
+            Usage 2 "Invalid switch specified - abort."
+            ;;
+    esac
+done
+
+shift `expr $OPTIND - 1`
+
+if [ -n "$d_options" ]
+then
+    # If switches "-o" set them as variable if a = in there
+    if [ "${d_options%%=*}" != "$d_options" ]
+    then
+        . $(d_optionate)
+    fi
+fi
+
+: ${verbose:="/dev/null"}
+
+# if the -v switch is set, the echo the current parameters
+if [ -n "$VERBOSE" -a -n "$xtrace" ]; then
+    set | egrep '^d_.+=' >&2
+fi
+
+# if a TRACE variables exists use that to set switches
+if [ -n "$TRACE" ]; then
+    if $(echo "$TRACE" | egrep -q 'n'); then
+	      nodo="echo "
+    fi
+fi
+
+# Write to standard out and not a target file is nodo is not empty.
+e_nodo () {
+    if [ -z "$nodo" ]; then
+	      cat > "$1"
+    else
+	      cat
+    fi
+}
+
+if [ $# -eq 0 -a -n "$d_cmd_default" ]
+then
+    cmd=$d_cmd_default
+else
+    cmd=$1
+    shift
+fi
+
+declare -a D_SUP0
+export D_SUP0
+
+## And finally scan for definitions
+
+# Most derived order first.
+
+# Fiddly. Use process substitution to read filenames into an array.
+if [ $e_sys -eq 0 ]
+then
+SDIR=..
+
+readarray x < <(e_supporters .sh $SDIR)
+D_SUP0=(${D_SUP0[@]} ${x[@]})
+readarray x < <(e_supporters .def $SDIR)
+D_SUP0=(${D_SUP0[@]} ${x[@]})
+
+SDIR=/usr/local
+
+readarray x < <(e_supporters .sh $SDIR)
+D_SUP0=(${D_SUP0[@]} ${x[@]})
+readarray x < <(e_supporters .def $SDIR)
+D_SUP0=(${D_SUP0[@]} ${x[@]})
+
+# Home directory overrides
+SDIR=$HOME
+
+readarray x < <(e_supporters .sh $SDIR)
+D_SUP0=(${D_SUP0[@]} ${x[@]})
+readarray x < <(e_supporters .def $SDIR)
+D_SUP0=(${D_SUP0[@]} ${x[@]})
+
+else
+
+# Use the current path, this may introduce duplicates by content
+readarray x < <(e_supporters .sh)
+D_SUP0=(${D_SUP0[@]} ${x[@]})
+readarray x < <(e_supporters .def)
+D_SUP0=(${D_SUP0[@]} ${x[@]})
+
+SDIR=$(dirname $0)/..
+
+readarray x < <(e_supporters .sh)
+D_SUP0=(${D_SUP0[@]} ${x[@]})
+readarray x < <(e_supporters .def)
+D_SUP0=(${D_SUP0[@]} ${x[@]})
+
+fi
+
+# There is a rare usage where the script is called from its installed location.
+# This introduces duplicates
+
+# Remove duplicates (by name not content) and preserve order
+d_asort () {
+    echo $@ | xargs -n1 | awk '{ if (!length(x[$x0])) x[$0]=NR } END { for (i in x) { y[x[i]]=i }; for (i in y) print y[i]; }'
+}
+
+# Only readarray works
+readarray D_SUP0 < <(d_asort ${D_SUP0[@]} )
+
+# This then loads
+for i in ${D_SUP0[@]}
+do
+    . $i
+done
+
+if [ -n "$d_help" ]
+then
+    : ${cmd:=help}
+    e_cmd=h_${cmd}
+else
+    e_cmd=d_${cmd}
+fi
+
+typeset -a TFILES
+
+f_tpush () {
+    test $# -ge 1 || return
+
+    let idx=${#TFILES[@]}+1
+    TFILES[$idx]="$1"
+}
+
+f_errmsg () {
+    if [ "$VERBOSE" = "yes" -a -z "$d_ERRMSG" ]
+    then
+	      echo "${prog}: error: $err_level" >&2
+    fi
+
+    if [ "$VERBOSE" = "yes" -a -n "$d_ERRMSG" ]
+    then
+	      echo "${prog}: $d_ERRMSG : $err_level" >&2 
+    fi 
+
+    exit $err_level
+}
+
+f_tcleaner () {
+    if [ "$VERBOSE" != "yes" ]
+    then
+	      rm -f "${TFILES[@]}"
+    fi
+    
+    if [ $err_level -ne 0 ]
+    then
+        f_errmsg 
+    fi
+}
+
+trap f_tcleaner EXIT
+
+# Sometimes I set the err_level directly
+
+typeset -i err_level
+let err_level=-1
+${e_cmd} "$@"
+typeset -i terr_level=$?
+if [ $err_level -eq -1 ]
+then
+    let err_level=terr_level
+fi
+
+exit $err_level

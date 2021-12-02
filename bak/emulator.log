@@ -1,0 +1,29 @@
+WARNING | unexpected system image feature string, emulator might not function correctly, please try updating the emulator.
+WARNING | cannot add library /home/build/0/android/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so: failed
+pulseaudio: pa_context_connect() failed
+pulseaudio: Reason: Connection refused
+pulseaudio: Failed to initialize PA contextaudio: Could not init `pa' audio driver
+qemu-system-x86_64: error while loading state for instance 0x0 of device 'kvm-tpr-opt'
+INFO    | added library /home/build/0/android/emulator/lib64/vulkan/libvulkan.so
+INFO    | configAndStartRenderer: setting vsync to 60 hz
+INFO    | Started GRPC server at 127.0.0.1:8554, security: Local
+INFO    | Advertising in: /run/user/10014/avd/running/pid_227989.ini
+INFO    | Deleting snapshot default_boot
+INFO    | Your emulator is out of date, please update by launching Android Studio:
+ - Start Android Studio
+ - Select menu "Tools > Android > SDK Manager"
+ - Click "SDK Tools" tab
+ - Check "Android Emulator" checkbox
+ - Click "OK"
+
+INFO    | boot completed
+INFO    | boot time 57355 ms
+INFO    | Increasing screen off timeout, logcat buffer size to 2M.
+INFO    | Revoking microphone permissions for Google App.
+ERROR   | adb protocol fault (couldn't read status length)
+INFO    | Critical: Failed to load https://maps.googleapis.com/maps/api/mapsjs/gen_204?csp_test=true: The 'Access-Control-Allow-Origin' header has a value 'qrc://' that is not equal to the supplied origin. Origin 'qrc://' is therefore not allowed access. (qrc:/html/js/common.js:0, (null))
+
+INFO    | Critical: Failed to load https://maps.googleapis.com/maps/api/mapsjs/gen_204?csp_test=true: The 'Access-Control-Allow-Origin' header has a value 'qrc://' that is not equal to the supplied origin. Origin 'qrc://' is therefore not allowed access. (qrc:/html/js/common.js:0, (null))
+
+[227989:227989:1202/122719.940665:ERROR:zygote_communication_linux.cc(275)] Failed to send GetTerminationStatus message to zygote
+[227989:227989:1202/122720.000522:ERROR:zygote_communication_linux.cc(275)] Failed to send GetTerminationStatus message to zygote

@@ -114,3 +114,9 @@ intellij-idea-community.
 
 You only need android-studio for the SDK and AVDs.
 
+# # Android and Appium Testing: Utilities #
+
+## System ##
+
+This runs on Linux. It uses a shell wrapper for the script hlpr and this uses
+hlpr.def and hlpr.sh. 

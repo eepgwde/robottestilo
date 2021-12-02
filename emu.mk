@@ -24,7 +24,10 @@ site-local:
 	test -n "$(ANDROID_SDK_ROOT)"
 	test -d "$(ANDROID_SDK_ROOT)"
 
-emulator:
+adb-server.flag: adb
+	touch $@
+
+emulator: adb-server.flag
 	nohup emulator/emulator @$(IMG) $(X_GPU) > emulator.log 2>&1 &
 
 clean-appium:
@@ -36,11 +39,19 @@ appium:
 adb:
 	adb start-server
 
-clean-local::
+adb-kill:
 	-adb kill-server
+	$(RM) adb-server.flag
+
+clean-local:: 
 	-pgrep -u $(USER) -fl emulator | ( while read i j; do kill $$i; done )
+	-pkill adb
+	(MAKE) adb-kill
 
 clean-local:: clean-appium
+
+clean:: 
+	$(RM) $(wildcard appium-*.log emulator.log adb-server.flag)
 
 # Launch development tools
 
