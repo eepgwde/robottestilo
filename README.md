@@ -118,5 +118,43 @@ You only need android-studio for the SDK and AVDs.
 
 ## System ##
 
+### Scripting utility ###
+
 This runs on Linux. It uses a shell wrapper for the script hlpr and this uses
 hlpr.def and hlpr.sh. 
+
+The source file for hlpr is here
+
+https://sourceforge.net/p/ill/site/base/ci/master/tree/bin/m_
+
+### Processing Appium Logs ###
+
+### Workflows ###
+
+#### Start system ####
+
+Start an emulator, adb server and appium.
+
+ make all-local
+ 
+You should physically an emulator start.
+
+#### Initialize system ####
+
+Start a session and get some basic state information
+
+ make app-init0.flag
+
+You should see the emulator load the app.
+The file session.json will contain the session information
+The file app-session.flag will contain the session id
+The file app-init0.flag will etc/appium/init0.sh
+
+The session will eventually time out, check this with
+
+ hlpr app session-list
+ 
+Or 
+
+ hlpr app session-isnull
+ 

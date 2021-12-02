@@ -11,7 +11,11 @@ SYSU ?= systemctl --user
 
 X_RND ?= $$$$
 
-APPIUM_FLAGS ?= -g appium-$(X_RND).log --log-timestamp --local-timezone --log-no-colors --tmp $(TMPDIR) --suppress-adb-kill-server 
+APPIUM_FLAGS ?= -g appium-$(X_RND).log --log-timestamp --local-timezone --log-no-colors --tmp $(TMPDIR) --suppress-adb-kill-server
+
+H_FLAGS ?= 
+H_ ?= hlpr $(H_FLAGS)
+
 
 .PHONY: emulator all-local clean clean-local site-local view-local
 
@@ -45,15 +49,39 @@ adb-kill:
 
 clean-local:: 
 	-pgrep -u $(USER) -fl emulator | ( while read i j; do kill $$i; done )
+	$(MAKE) adb-kill
 	-pkill adb
-	(MAKE) adb-kill
+	$(MAKE) clean-local-local
 
 clean-local:: clean-appium
 
-clean:: 
+clean-local-local:
+	$(RM) $(wildcard app-*.flag)
+
+clean:: clean-local-local
 	$(RM) $(wildcard appium-*.log emulator.log adb-server.flag)
 
+## Development activities
+
+app-session.flag:
+	$(H_) app session-create
+	mv session.json-id $@
+
+# This uses a script in the etc/appium directory
+#  make app-init0.flag
+
+app-%.flag: etc/appium/%.sh app-session.flag
+	$(H_) adb script $(firstword $+)
+	$(H_) adb run > $@
+
+session-live:
+	$(H_) app session-isnull
+	$(MAKE) clean-local-local
+
 # Launch development tools
+
+inspect:
+	nohup appium-i > /dev/null 2>&1 &
 
 studio:
 	$(SYSU) start ssnap@android-studio

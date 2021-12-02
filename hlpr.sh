@@ -32,7 +32,7 @@ EOF
 
 d_json_pp () {
   # pretty print JSON
-  $nodo python3 -m json.tool $@
+  $nodo python3 -m json.tool
 }
 
 d_applog () {
@@ -112,9 +112,44 @@ d_app () {
 
   : ${d_dir:=$PWD}
 
+  local tfile=$(mktemp)
+  f_tpush $tfile
+
   case $cmd in
+    cmd0)
+      ## Use a named file (usually temporary) as output
+      test -n "$e_file" || return 2
+      $nodo curl -s --output $e_file -H 'Content-type: application/json' $*
+      ;;
+
+    cmd1)
+      $nodo curl -s -H 'Content-type: application/json' $* 
+      ;;
+
+    session-isnull)
+      read sid < <($FUNCNAME session-list | jq -r '.value[0]')
+      test -n "$sid" || return 2
+      if [ "$sid" = "null" ]
+      then
+        return 0
+      fi
+      return 1
+      ;;
+
+    session-list-id)
+      $FUNCNAME session-list | d_json_pp | jq -r '.value[0].id'
+      ;;
+
+    session-list)
+      $FUNCNAME cmd1 -X GET http://localhost:4723/wd/hub/sessions
+      # > $tfile
+      # cat $tfile | jq -r '.value[0].id'
+      ;;
+
     session-id)
-      d_applog session-id $d_log > ${d_file}-id
+      test $# -ge 1 || return 2
+      test -f $1 || return 2
+      d_applog session-id $1
       ;;
 
     session-create)
@@ -122,11 +157,85 @@ d_app () {
       : ${d_file:=${d_dir}/${cmd}.json}
       test -f ${d_file} || return 2
       : ${d_log:=$(echo $d_file | sed 's/-create//g')}
-      local tfile=$(mktemp)
-      f_tpush $tfile
 
-      $nodo curl -s --output $tfile -H 'Content-type: application/json' -X POST http://localhost:4723/wd/hub/session -d @${d_file} | d_json_pp $tfile > $d_log
-      $FUNCNAME session-id
+      # Fix the temporary file
+      e_file=$tfile
+      $FUNCNAME cmd0 -X POST http://localhost:4723/wd/hub/session -d @${d_file}
+      cp -b $e_file session-create.out
+      test -s $e_file || return 2
+      cat $e_file | d_json_pp > $d_log
+      $FUNCNAME session-id $d_log > ${d_log}-id
      ;;
+  esac
+}
+
+h_adb () {
+  cat >&2 <<EOF
+
+    $prog ${FUNCNAME##h_} cmd|snippet|trim
+
+    Generate adb commands
+
+    - cmd
+
+    $prog [-n] [-x] [-l outputfile] [-s adb-invocation] ${FUNCNAME##h_} cmd adb-args
+
+    echoes an adb command to the console.
+
+    - snippet and trim
+
+    cat infile | $prog [-u e_null] [-n] [-x] [-l outputfile] ${FUNCNAME##h_} (snippet|trim)
+    
+    creates a script, outputfile or adb0.sh, of commands from infile
+    filter each line by function e_null (default is e_trim)
+
+    trim just returns the filtered strings
+
+  - script
+
+    $prog [-u e_null] [-n] [-x] [-l outputfile] ${FUNCNAME##h_} script inputfile
+
+    This creates a script from inputfile see etc/appium/init0.sh
+
+EOF
+}
+
+e_null () {
+  cat
+}
+
+e_trim () {
+  cut -c30- 
+}
+
+d_adb () {
+  test $# -ge 1 || return 1
+  local cmd="$1"
+  shift
+
+  e_weaves="e_trim"
+  e_user=e_${d_user}
+
+  : ${d_service:=adb -P 5037 -s emulator-5554}
+  : ${d_log:=adb0.sh}
+
+  case $cmd in
+    trim)
+      $e_user
+      ;;
+
+    run)
+      $nodo bash $d_log
+      ;;
+
+    script)
+      cat $* | while read line0; do $FUNCNAME cmd $line0; done > $d_log
+      ;;
+    snippet)
+      $e_user | while read line0; do $FUNCNAME cmd $line0; done > $d_log
+      ;;
+    cmd)
+      echo $d_service $*
+      ;;
   esac
 }
