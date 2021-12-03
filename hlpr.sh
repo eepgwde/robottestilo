@@ -156,7 +156,7 @@ d_app () {
       # use applog session-id
       : ${d_file:=${d_dir}/${cmd}.json}
       test -f ${d_file} || return 2
-      : ${d_log:=$(echo $d_file | sed 's/-create//g')}
+      : ${d_log:=${d_dir}/session.json}
 
       # Fix the temporary file
       e_file=$tfile
@@ -238,4 +238,27 @@ d_adb () {
       echo $d_service $*
       ;;
   esac
+}
+
+d_mk () {
+  test $# -ge 1 || return 1
+  local cmd="$1"
+  shift
+
+  case $cmd in
+    log)
+      $nodo tail -f $(m_ -d . mr 'appium-*.log')
+      ;;
+    cold)
+      make ${nodo:+"-n"} -f emu.mk clean-local
+      make ${nodo:+"-n"} -f emu.mk X_SNAPSHOT=-no-snapshot-load all-local
+      ;;
+    warm)
+      make ${nodo:+"-n"} -f emu.mk clean-local
+      make ${nodo:+"-n"} -f emu.mk all-local
+      ;;
+    session)
+      make ${nodo:+"-n"} session-live
+      ;;
+  esac  
 }

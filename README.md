@@ -145,7 +145,8 @@ Start a session and get some basic state information
 
  make app-init0.flag
 
-You should see the emulator load the app.
+You should see the emulator load the app. It uses files in etc/appium
+
 The file session.json will contain the session information
 The file app-session.flag will contain the session id
 The file app-init0.flag will etc/appium/init0.sh
@@ -157,4 +158,31 @@ The session will eventually time out, check this with
 Or 
 
  hlpr app session-isnull
- 
+
+#### Using Inspector ####
+
+ make session-live
+
+the last one deletes the flag files so that a session can be restarted.
+
+#### Using Inspector ####
+
+## Journal
+
+2021-12-03 09:55:38:133 [W3C] Encountered internal error running command: UnknownError: An unknown server-
+side error occurred while processing the command. Original error: Could not proxy command to the remote se
+rver. Original error: socket hang up
+2021-12-03 09:55:38:133 [W3C]     at UIA2Proxy.command (/usr/local/lib/node_modules/appium/node_modules/ap
+pium-base-driver/lib/jsonwp-proxy/proxy.js:274:13)
+2021-12-03 09:55:38:133 [W3C]     at runMicrotasks (<anonymous>)
+2021-12-03 09:55:38:133 [W3C]     at processTicksAndRejections (node:internal/process/task_queues:96:5)
+2021-12-03 09:55:38:133 [W3C]     at AndroidUiautomator2Driver.commands.getDevicePixelRatio (/usr/local/li
+b/node_modules/appium/node_modules/appium-uiautomator2-driver/lib/commands/viewport.js:14:10)
+2021-12-03 09:55:38:133 [W3C]     at AndroidUiautomator2Driver.fillDeviceDetails (/usr/local/lib/node_modu
+les/appium/node_modules/appium-uiautomator2-driver/lib/driver.js:244:28)
+2021-12-03 09:55:38:133 [W3C]     at AndroidUiautomator2Driver.createSession (/usr/local/lib/node_modules/
+appium/node_modules/appium-uiautomator2-driver/lib/driver.js:230:7)
+2021-12-03 09:55:38:133 [W3C]     at AppiumDriver.createSession (/usr/local/lib/node_modules/appium/lib/ap
+pium.js:387:35)
+
+

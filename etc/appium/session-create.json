@@ -3,7 +3,7 @@
         "app": "/home/build/0/o2/cache/Mein_o2.apk",
         "appActivity": "canvasm.myo2.SplashActivity",
         "appPackage": "canvasm.myo2",
-        "newCommandTimeout": 120,
+        "newCommandTimeout": 180,
         "platformVersion": "9",
         "automationName": "UIAutomator2",
         "platformName": "Android",
@@ -19,7 +19,7 @@
                 "appium:automationName": "UIAutomator2",
                 "appium:avd": "emulator2",
                 "appium:deviceName": "emulator2",
-                "appium:newCommandTimeout": 120,
+                "appium:newCommandTimeout": 180,
                 "platformName": "android",
                 "appium:platformVersion": "9"
             }
