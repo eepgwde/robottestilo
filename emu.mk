@@ -65,7 +65,7 @@ clean-local-local:
 	$(RM) $(wildcard app-*.flag)
 
 clean:: clean-local-local
-	$(RM) $(wildcard appium-*.log emulator.log adb-server.flag adb0.sh session-create.out session.json)
+	$(RM) $(wildcard session.json* session-create.out* badging.lst appium-*.log emulator.log adb-server.flag adb0.sh session-create.out session.json)
 
 ## Development activities
 

@@ -215,8 +215,9 @@ d_adb () {
 
   e_weaves="e_trim"
   e_user=e_${d_user}
+  : ${d_machine:=emulator-5554}
 
-  : ${d_service:=adb -P 5037 -s emulator-5554}
+  : ${d_service:=adb -P 5037 -s ${d_machine}}
   : ${d_log:=adb0.sh}
 
   case $cmd in
@@ -226,6 +227,10 @@ d_adb () {
 
     run)
       $nodo bash $d_log
+      ;;
+
+    settings)
+      $d_service shell am start -n com.android.settings/.Settings
       ;;
 
     script)
@@ -261,4 +266,52 @@ d_mk () {
       make ${nodo:+"-n"} session-live
       ;;
   esac  
+}
+
+h_aa () {
+  cat >&2 <<EOF
+
+    $prog [-f badging.lst] ${FUNCNAME##h_} badging|package|activity
+
+  badging - get the badging information from the APK on the command-line
+  stores it to the '-f' outfile, default badging.lst
+
+  package - extract the package name from the badging file given by badging.lst
+
+  activity - extract the launch activity from the badging file
+
+  start - generate an adb package start line
+
+EOF
+
+}
+
+d_aa () {
+  test $# -ge 1 || return 1
+  local cmd="$1"
+  shift
+
+  : ${d_dir:=.}
+  : ${d_file:=${d_dir}/badging.lst}
+
+  case $cmd in
+    badging)
+      test $# -ge 1 || return 4
+
+      local tfile=$(mktemp)
+      f_tpush $tfile
+      aapt dump badging "$1" > $d_file
+      ;;
+    package)
+      test -f ${d_file} || return 2
+      awk -F" " '/package/ {print $2}' $d_file | awk -F"'" '/name=/ {print $2}'
+      ;;
+    activity)
+      test -f ${d_file} || return 2
+      awk -F" " '/launchable-activity/ {print $2}' $d_file | awk -F"'" '/name=/ {print $2}'
+      ;;
+    start)
+      echo shell am start -n $($FUNCNAME package)/$($FUNCNAME activity)
+      ;;
+  esac
 }

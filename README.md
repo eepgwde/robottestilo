@@ -2,7 +2,120 @@
 
 weaves
 
-# Android Development #
+# Android Development on Windows and Linux #
+
+Windows can run the emulator more quickly than Linux in nested virtualization.
+
+To run an emulator on Windows, start it as usual, using AVD Tools in Android Studio.
+
+https://www.reddit.com/r/Crostini/comments/hqyjir/android_emulator_remote_host/
+
+Use adb on the Windows side to reconfigure, redirect from 1234 to 5555
+
+ adb forward tcp:1234 tcp:5555
+
+and restart on 5555
+
+ adb tcpip 5555
+ 
+In the emulator, there will be a prompt to allow USB debugging.
+
+Then connect
+
+ adb connect 192.168.127.1:1234
+ 
+and watch for allow USB debugging.
+
+Then 
+
+ adb devices 
+ 
+will show 
+
+ 192.168.127.1:1234
+
+As a Windows Adminstrator redirect the network port to the emulator
+
+ netsh interface portproxy add v4tov4 listenaddress=192.168.127.1 listenport=1234 connectaddress=127.0.0.1 connectport=5555
+
+Go to Linux
+
+ adb kill-server
+ adb start-server
+ adb connect 192.168.127.1:1234
+ adb devices
+
+And adb is connected from Linux.
+
+# Android Development on Linux#
+
+To use the emulator on Linux you need to be a member of the kvm group.
+
+## Appium
+
+### NPM install 
+
+You can use SNAP to provide an npm and to install to /usr/local
+
+ snap install node --classic --channel=16
+
+ npm config set prefix /usr/local
+
+Change to the staff group (newgrp staff) and use 
+
+ npm install -g appium
+ 
+You check the installation with 
+
+ npm install -g appium-doctor
+ 
+You will need /snap/bin on your path.
+
+### Using Appium Applications
+
+Download the system images and install them locally.
+Links are used here.
+
+## Android SDK and AVD: using Android Studio ##
+
+### Use the SDK Manager in Tools
+
+
+# Android Development on Linux#
+
+To use the emulator on Linux you need to be a member of the kvm group.
+
+## Appium
+
+### NPM install 
+
+You can use SNAP to provide an npm and to install to /usr/local
+
+ snap install node --classic --channel=16
+
+ npm config set prefix /usr/local
+
+Change to the staff group (newgrp staff) and use 
+
+ npm install -g appium
+ 
+You check the installation with 
+
+ npm install -g appium-doctor
+ 
+You will need /snap/bin on your path.
+
+### Using Appium Applications
+
+Download the system images and install them locally.
+Links are used here.
+
+## Android SDK and AVD: using Android Studio ##
+
+### Use the SDK Manager in Tools
+
+
+# Android Development on Linux#
 
 To use the emulator on Linux you need to be a member of the kvm group.
 
@@ -168,6 +281,13 @@ the last one deletes the flag files so that a session can be restarted.
 #### Using Inspector ####
 
 ## Journal
+
+### Error 1
+
+This arises when the emulator has been left unattended for too long, usually
+overnight.
+
+You need to restart the emulator with -no-snapshot-load with see hlpr.sh d_mk cold
 
 2021-12-03 09:55:38:133 [W3C] Encountered internal error running command: UnknownError: An unknown server-
 side error occurred while processing the command. Original error: Could not proxy command to the remote se
