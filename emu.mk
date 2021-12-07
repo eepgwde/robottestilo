@@ -2,13 +2,25 @@
 
 # For the basic-appium-project
 IMG ?= emulator2
+
+OSTYPE := $(shell uname -o)
+
 # For emma Linux on hyper-v
+ifeq ($(strip $(OSTYPE)),Cygwin)
+X_GPU ?=
+X_KILLR_EMU ?= taskkill /f /t /fi "imagename eq emulator*"
+else
 X_GPU ?= -gpu swiftshader_indirect
+X_KILLR_EMU ?= pgrep -u $(USER) -f emulator
+endif
+
 
 # See Error 1 in the README.md
 # You need to start cold.
+
 # X_SNAPSHOT ?= -no-snapshot-load
 X_SNAPSHOT ?= 
+
 EMULATOR_ARGS ?= $(X_GPU) $(X_SNAPSHOT)
 
 USER ?= $(shell id -nu)
@@ -30,6 +42,7 @@ all: view-local
 all-local:: site-local adb appium emulator
 
 site-local:
+	echo OSTYPE - $(strip $(OSTYPE))
 	echo $(X_RND)
 	test -n "$(ANDROID_SDK_ROOT)"
 	test -d "$(ANDROID_SDK_ROOT)"
@@ -41,7 +54,7 @@ emulator: adb-server.flag
 	nohup emulator/emulator @$(IMG) $(EMULATOR_ARGS) > emulator.log 2>&1 &
 
 clean-appium:
-	-pgrep -u $(USER) -fl appium | ( while read i j; do kill $$i && sleep 2; done )
+	-pkill -u $(USER) -f appium 
 
 appium: 
 	nohup appium $(APPIUM_FLAGS) > /dev/null 2>&1 &
@@ -54,9 +67,9 @@ adb-kill:
 	$(RM) adb-server.flag
 
 clean-local:: 
-	-pgrep -u $(USER) -fl emulator | ( while read i j; do kill $$i; done )
+	-$(X_KILLR_EMU) 
 	$(MAKE) adb-kill
-	-pkill adb
+	-pkill -u $(USER) -f adb
 	$(MAKE) clean-local-local
 
 clean-local:: clean-appium
