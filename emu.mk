@@ -83,7 +83,7 @@ clean:: clean-local-local
 ## Development activities
 
 app-session.flag:
-	$(H_) -f etc/appium/session-create.json app session-create
+	$(H_) app session-create
 	mv session.json-id $@
 
 # This uses a script in the etc/appium directory

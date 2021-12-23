@@ -126,6 +126,20 @@ d_app () {
       $nodo curl -s -H 'Content-type: application/json' $* 
       ;;
 
+    cmd2)
+	: ${d_service:=http://127.0.0.1:4723/wd/hub}
+
+	test -f ${d_dir}/session.json-id || return 2
+	local sid
+	local cmd
+	read sid < <(cat ${d_dir}/session.json-id)
+	echo $sid > $verbose
+
+	read cmd < <(echo "$@" | sed -e 's,:session_id/,'$sid/',g')
+	
+      $nodo curl -s "${d_service}${cmd}"
+      ;;
+
     session-isnull)
       read sid < <($FUNCNAME session-list | jq -r '.value[0]')
       test -n "$sid" || return 2
@@ -135,6 +149,10 @@ d_app () {
       fi
       return 1
       ;;
+
+    page) # it's JSON from the server.
+	$FUNCNAME cmd2 /session/:session_id/source | jq -r '.value'
+	;;
 
     session-list-id)
       $FUNCNAME session-list | d_json_pp | jq -r '.value[0].id'
@@ -153,14 +171,17 @@ d_app () {
       ;;
 
     session-create)
-      # use applog session-id
-      : ${d_file:=${d_dir}/${cmd}.json}
+	# use applog session-id
+	: ${d_file:=etc/appium/${cmd}-${OSTYPE}.json}
+	: ${d_file:=etc/appium/${cmd}.json}
+
       test -f ${d_file} || return 2
       : ${d_log:=${d_dir}/session.json}
 
       # Fix the temporary file
       e_file=$tfile
       $FUNCNAME cmd0 -X POST http://localhost:4723/wd/hub/session -d @${d_file}
+      sync
       cp -b $e_file session-create.out
       test -s $e_file || return 2
       cat $e_file | d_json_pp > $d_log
@@ -217,7 +238,8 @@ d_adb () {
   e_user=e_${d_user}
   : ${d_machine:=emulator-5554}
 
-  : ${d_service:=adb -P 5037 -s ${d_machine}}
+  # : ${d_service:=adb -P 5037 -s ${d_machine}}
+  : ${d_service:=adb -P 5037}
   : ${d_log:=adb0.sh}
 
   case $cmd in
