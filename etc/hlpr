@@ -276,11 +276,13 @@ Flags
 
   -h             Help message                  no help given
   -a             An arbitrary flag
+  -o             Pass options
 
 Arguments
 
   -c             A count argument (numeric)    -1
-  -f             A file argument               None
+  -f             A file argument input         None
+  -l             A file argument log           None
   -d             A directory argument          None
   -s             A service argument            None 
   -u             A username                    $d_user

@@ -1,0 +1,22 @@
+# weaves
+#
+# Android on Cygwin 
+# The files are put into the same location but need to use Windows paths
+#
+
+xroot=/home/build/0/android
+
+set -a
+
+ANDROID_PREFS_ROOT="$(cygpath -w $xroot)"
+ANDROID_SDK_ROOT="${ANDROID_PREFS_ROOT}"
+ANDROID_HOME="${ANDROID_PREFS_ROOT}"
+
+ANDROID_AVD_HOME="$(cygpath -w "$xroot/.android/avd")"
+ANDROID_EMULATOR_HOME="$(cygpath -w "$xroot/.android")"
+
+W10TMP=`cygpath -u 'D:\Users\weaves\AppData\Local'`/Temp
+set +a
+
+PATH=`pathmerge -d "${PATH}" $xroot/platform-tools $xroot/tools $xroot/emulator 2> /dev/null`
+
