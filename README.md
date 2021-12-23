@@ -194,9 +194,8 @@ To use these operations, you will need xmlstarlet and xsltproc.
 You use 'hlpr xml' to post-process individual files with xmlstarlet. This is for checking
 XPath.
 
-By default 'hlpr xml' will use the most recent file in the pages/ directory by
-default. You should try and remember what screen appeared for this file or use the
-comments feature when capturing.
+By default 'hlpr xml' will use the most recent file in the pages/ directory. You should try and 
+remember what screen appeared for this file or use the comments feature when capturing.
 
 You can try out some XPaths on the captured files in pages/. Use the examples in the d_xml
 function of hlpr.sh for guidelines. 
@@ -213,14 +212,14 @@ It just lists the elements.
 
 Similarly, you can see the last file's interesting elements:
 
- hlpr xml textview # TextView
- hlpr xml clickable-radiobutton # RadioButton
- hlpr xml clickable-edittext # EditText
+   hlpr xml textview # TextView
+   hlpr xml clickable-radiobutton # RadioButton
+   hlpr xml clickable-edittext # EditText
 
 And general enquiries:
 
- hlpr xml text-nonempty # anything with text
- hlpr xml clickable # any clickable fields
+   hlpr xml text-nonempty # anything with text
+   hlpr xml clickable # any clickable fields
 
 #### XPath Attributes and Text Elements
 
@@ -228,11 +227,11 @@ And general enquiries:
 
 This can be useful
 
-    hlpr xml attnames
+   hlpr xml attnames
 
 The gets all the attributes names in order. It's a good idea to sort uniquely with
 
- hlpr xml attnames | sort -u
+   hlpr xml attnames | sort -u
 
 and you should see the attributes used on all the elements. This method is useful for
 checking if you have a non-compliant file.
@@ -241,44 +240,44 @@ checking if you have a non-compliant file.
 
 You can get all interesting elements in a Properties file format using this:
 
-  hlpr xml text
+   hlpr xml text
 
 Many Android apps don't make use of buttons directly and there may be clickable fields
 that have no text. The clickable elements are usually in LinearLayoutCompat and ViewGroup.
 
 You can try text2, but this finds elements that contain elements that contain text.
 
-  hlpr xml text2
+   hlpr xml text2
 
 ##### XPaths
 
 You can get all the XPaths for every attribute from the file.
 
-  hlpr xml xpath
+   hlpr xml xpath
 
 The file will be large. 10000 lines is typical. You can filter it by looking for text
 strings and particular @bounds attributes. This gets a record with non-empty text.
 
 For a file to find the non-empty text attributes use
 
-  egrep 'text="[^"]+"' pages/w00001
+   egrep 'text="[^"]+"' pages/w00001
 
 For the XPath use this
 
-  hlpr xml xpath | egrep '@text='\''.+'\'''
+   hlpr xml xpath | egrep '@text='\''.+'\'''
 
 ### Batch Processing
 
 You can apply the text.xslt and xpath.xslt using GNU Make and the file xsl0.mk
 
- make -f xsl0.mk all-local
+   make -f xsl0.mk all-local
 
 This makes a new directory called cache/ and puts the processed files into it.
 
-Then you can process the cache/*-text.xml to see how many are alike by using the checksum
+Then you can process the cache/\*-text.xml to see how many are alike by using the checksum
 of the file
 
- make -f xsl0.mk all-local2
+   make -f xsl0.mk all-local2
 
 That produces a single file text.sums. This contains the files that were first to have a
 common checksum. 
@@ -287,7 +286,7 @@ You can copy then process those files to produce Java Properties files.
 
  make -f xsl0.mk S_FILE=text.sums all-local3
 
-You should then see files cache/*-text.properties. Ideally, each of these should be unique
+You should then see files cache/\*-text.properties. Ideally, each of these should be unique
 to a page. The text.xslt and the final wXXXXX-text.properties is not so useful. It will
 contain the unique text shown to each user.
 
@@ -296,8 +295,8 @@ be unique, but are difficult to find.
 
 # Android Development on Windows and Linux #
 
-[Editor: this section is mostly notes on setting up on Windows after using the Linux
-systems under nested virtualization.]
+\[Editor: this section is mostly notes on setting up on Windows after using the Linux
+systems under nested virtualization.\]
 
 Windows can run the emulator more quickly than Linux in nested virtualization.
 
