@@ -21,15 +21,21 @@
       </results>
   -->
 
-  <xsl:template match="/">
-    <xsl:for-each select="/hierarchy//*/android.widget.RadioButton">
-      <xsl:if test="@checkable = 'true' and @clickable = 'true'">
-        <xsl:value-of select="./@resource-id"/>
-        <xsl:text>&#10;</xsl:text>
-        <xsl:value-of select="./@text"/>
-        <xsl:text>&#10;</xsl:text>
-      </xsl:if>
-      </xsl:for-each>
+  <xsl:template match="node()|@*">
+    <xsl:apply-templates select="node()|@*"/>
+  </xsl:template>
+  
+  <xsl:template match="*[*/@text != '']">
+      <xsl:text>page.textv.resource-id=</xsl:text>
+
+      <xsl:value-of select="substring(./@resource-id,1,80)"/>
+      <xsl:text>|</xsl:text>
+
+      <xsl:value-of select="./@bounds"/>
+      <xsl:text>|</xsl:text>
+
+      <xsl:value-of select="./@class"/>
+      <xsl:text>&#10;</xsl:text>
   </xsl:template>
 
 </xsl:stylesheet>

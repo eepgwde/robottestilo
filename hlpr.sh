@@ -33,6 +33,56 @@ d_mr () {
 
 }
 
+h_list () {
+  cat >&2 <<EOF
+
+    Copy files into the project src directories
+
+    $prog [-n] [-x] [-l outputfile] [-f inputfile] ${FUNCNAME##h_} sdirs3|sdirs4|sdir5
+
+    sdirs3 lists all the eligible directories that are down of \$TOP $TOP
+    then sdirs4 prints the package names
+    then sdirs5 prints the pairs
+
+    then sdirs6 will copy the package-info.java file changing the package name to the directory.
+
+    sdirs7 will list those directories.
+
+EOF
+}
+
+
+d_list () {
+    test $# -ge 1 || return 1
+    local cmd="$1"
+    shift
+
+    # : ${d_dir:=$PWD}
+    # : ${d_file:=$(m_ -d $PWD mr 'appium-*.log')}
+    # : ${d_log:=$(echo $d_file | sed 's/appium/adb/g')}
+
+    case $cmd in
+	props-inc)
+	    awk 'BEGIN { FS="="; ctr=1; OFS="=" }
+$1 ~ /resource-id$/ { $1=$1"."ctr; print; ctr=ctr+1 }
+' $@
+	    ;;
+	first)
+	    # first of its kind - output of sum(1)
+	    awk 'BEGIN { mark=0 }
+$1 != mark { print $1, $NF; mark=$1 }'
+	    ;;
+
+	apk*)
+	    : ${d_dir:=apk/Mein_o2}
+	    : ${d_log:=./apk.lst}
+	    
+	    find $d_dir -type f -name '*.xml' -exec grep -q -s 'android:id=' {} \; -print | \
+		tee ${cmd}.lst
+	    ;;
+    esac
+}
+	  
 h_applog () {
     cat >&2 <<EOF
 
@@ -183,7 +233,7 @@ d_app () {
 	_commentfile)
 	    if [ -n "$d_log" ]
 	    then
-		test -w "$d_log" || return 4
+		touch "$d_log"
 		echo $d_log
 	    else
 		# On cygwin, mktemp doesn't work 
@@ -521,11 +571,15 @@ d_xml () {
 	clickable-edittext)
 	    $nodo $xml sel -t -c "/hierarchy//*[android.widget.EditText/@clickable = 'true']" -n $d_file
 	    ;;
+	clickable-nonempty)
+	    ## This never produces
+	    $nodo $xml sel -t -c "/hierarchy//*[*/@clickable = 'true' and @text != '']" -n $d_file
+	    ;;
 	clickable)
 	    $nodo $xml sel -t -c "/hierarchy//*[*/@clickable = 'true']" -n $d_file
 	    ;;
 	text-nonempty)
-	    $nodo $xml ed -d "/hierarchy//*[*/@text = '']" $d_file
+	    $nodo $xml ed -d "/hierarchy//*[*/@text != '']" $d_file
 	    ;;
 	text-empty)
 	    $nodo $xml sel -t -c "/hierarchy//*[*/@text = '']" -n $d_file

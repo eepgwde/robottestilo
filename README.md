@@ -173,9 +173,9 @@ directory and should start with "c". You can put a comment on the command-line
     $ hlpr -l pages/c-locked1 app page-pages consent page
 
 It calculates a checksum and puts that into the comments file with a timestamp, you can
-put this into a shell script to snapshot every minute if you wish:
+put this into a shell script to snapshot every minute:
 
-    $ nohup bash -c 'while sleep 60; do hlpr -l pages/c-locked1 app page-pages ; done' &
+    $ nohup bash -c 'until false; do hlpr -l pages/c-locked1 app page-pages; sleep 60; done' &
 
 ## Converting testconfig.properties files
 
@@ -239,12 +239,16 @@ checking if you have a non-compliant file.
 
 ##### Text Elements
 
-You can get all interesting elements in a Properties file format. 
+You can get all interesting elements in a Properties file format using this:
 
   hlpr xml text
 
-The file will be large. 10000 lines is typical. You can 
+Many Android apps don't make use of buttons directly and there may be clickable fields
+that have no text. The clickable elements are usually in LinearLayoutCompat and ViewGroup.
 
+You can try text2, but this finds elements that contain elements that contain text.
+
+  hlpr xml text2
 
 ##### XPaths
 
@@ -252,13 +256,54 @@ You can get all the XPaths for every attribute from the file.
 
   hlpr xml xpath
 
-The file will be large. 10000 lines is typical. You can 
+The file will be large. 10000 lines is typical. You can filter it by looking for text
+strings and particular @bounds attributes. This gets a record with non-empty text.
+
+For a file to find the non-empty text attributes use
+
+  egrep 'text="[^"]+"' pages/w00001
+
+For the XPath use this
+
+  hlpr xml xpath | egrep '@text='\''.+'\'''
+
+### Batch Processing
+
+You can apply the text.xslt and xpath.xslt using GNU Make and the file xsl0.mk
+
+ make -f xsl0.mk all-local
+
+This makes a new directory called cache/ and puts the processed files into it.
+
+Then you can process the cache/*-text.xml to see how many are alike by using the checksum
+of the file
+
+ make -f xsl0.mk all-local2
+
+That produces a single file text.sums. This contains the files that were first to have a
+common checksum. 
+
+You can copy then process those files to produce Java Properties files.
+
+ make -f xsl0.mk S_FILE=text.sums all-local3
+
+You should then see files cache/*-text.properties. Ideally, each of these should be unique
+to a page. The text.xslt and the final wXXXXX-text.properties is not so useful. It will
+contain the unique text shown to each user.
+
+The text2.xslt properties is just the clickable elements that have some text. These should
+be unique, but are difficult to find.
 
 # Android Development on Windows and Linux #
+
+[Editor: this section is mostly notes on setting up on Windows after using the Linux
+systems under nested virtualization.]
 
 Windows can run the emulator more quickly than Linux in nested virtualization.
 
 To run an emulator on Windows, start it as usual, using AVD Tools in Android Studio.
+
+You can try to access the Emulator from Linux using some network redirection.
 
 https://www.reddit.com/r/Crostini/comments/hqyjir/android_emulator_remote_host/
 
@@ -299,41 +344,7 @@ Go to Linux
 
 And adb is connected from Linux.
 
-# Android Development on Linux#
-
-To use the emulator on Linux you need to be a member of the kvm group.
-
-## Appium
-
-### NPM install 
-
-You can use SNAP to provide an npm and to install to /usr/local
-
- snap install node --classic --channel=16
-
- npm config set prefix /usr/local
-
-Change to the staff group (newgrp staff) and use 
-
- npm install -g appium
- 
-You check the installation with 
-
- npm install -g appium-doctor
- 
-You will need /snap/bin on your path.
-
-### Using Appium Applications
-
-Download the system images and install them locally.
-Links are used here.
-
-## Android SDK and AVD: using Android Studio ##
-
-### Use the SDK Manager in Tools
-
-
-# Android Development on Linux#
+# Android Development on Linux #
 
 To use the emulator on Linux you need to be a member of the kvm group.
 
