@@ -135,7 +135,7 @@ and you will discover that a path is wrong or you have noReset and fullReset bot
 
 When you do get the system running, you can also try the Makefile version
 
- make session-live
+    make session-live
 
 this checks there is an existing session and if not starts a new one. (This is useful for
 automated testing, if you want to test with newCommandTimeout set to something non-zero.)
@@ -207,7 +207,7 @@ function of hlpr.sh for guidelines.
 
 You can get a sense of the depth and verbosity of the XML files with this
 
- hlpr xml structure
+   hlpr xml structure
 
 It just lists the elements.
 
