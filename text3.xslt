@@ -35,36 +35,69 @@
 
   <xsl:template match="*/*[@clickable = 'true']">
     <xsl:if test="@clickable = 'true'">
-      <xsl:text>-- CLICKABLE&#10;</xsl:text>
+      <xsl:text># clickable&#10;</xsl:text>
+
+      <xsl:variable name="id0" select="generate-id()" /> 
+      <xsl:variable name="id1" select="position()" /> 
+      
+      <xsl:text>clk.text.</xsl:text>
+      <xsl:value-of select="$id0"/>
+      <xsl:text>.</xsl:text>
+      <xsl:value-of select="$id1"/>
+      <xsl:text>=</xsl:text>
+      <xsl:value-of select="substring(@text,1,80)"/>
+      <xsl:text>&#10;</xsl:text>
+
       <xsl:text>clk.cls.</xsl:text>
-      <xsl:value-of select="position()"/>
+      <xsl:value-of select="$id0"/>
+      <xsl:text>.</xsl:text>
+      <xsl:value-of select="$id1"/>
       <xsl:text>=</xsl:text>
       <xsl:value-of select="local-name()"/>
       <xsl:text>&#10;</xsl:text>
+
       <xsl:text>clk.path.</xsl:text>
-      <xsl:value-of select="position()"/>
+      <xsl:value-of select="$id0"/>
+      <xsl:text>.</xsl:text>
+      <xsl:value-of select="$id1"/>
       <xsl:text>=</xsl:text>
-      <xsl:value-of select="path()"/>
+      <xsl:value-of select="replace(path(), '(Q\{\})', '')"/>
       <xsl:text>&#10;</xsl:text>
 
       <xsl:for-each select="./*[@text != '']">
+
+	<xsl:text>## clickable text&#10;</xsl:text>
 	<xsl:text>txt.text.</xsl:text>
+	<xsl:value-of select="$id0"/>
+	<xsl:text>.</xsl:text>
+	<xsl:value-of select="$id1"/>
+	<xsl:text>.</xsl:text>
 	<xsl:value-of select="position()"/>
 	<xsl:text>=</xsl:text>
 	<xsl:value-of select="substring(@text,1,80)"/>
 	<xsl:text>&#10;</xsl:text>
-	<xsl:text>txt.path.</xsl:text>
-	<xsl:value-of select="position()"/>
-	<xsl:text>=</xsl:text>
-	<xsl:value-of select="path()"/>
-	<xsl:text>&#10;</xsl:text>
 
 	<xsl:text>txt.cls.</xsl:text>
+	<xsl:value-of select="$id0"/>
+	<xsl:text>.</xsl:text>
+	<xsl:value-of select="$id1"/>
+	<xsl:text>.</xsl:text>
 	<xsl:value-of select="position()"/>
 	<xsl:text>=</xsl:text>
 	<xsl:value-of select="local-name()"/>
 	<xsl:text>&#10;</xsl:text>
-      </xsl:for-each>
+
+	<xsl:text>txt.path.</xsl:text>
+	<xsl:value-of select="$id0"/>
+	<xsl:text>.</xsl:text>
+	<xsl:value-of select="$id1"/>
+	<xsl:text>.</xsl:text>
+	<xsl:value-of select="position()"/>
+	<xsl:text>=</xsl:text>
+	<xsl:value-of select="replace(path(), '(Q\{\})', '')"/>
+	<xsl:text>&#10;</xsl:text>
+
+</xsl:for-each>
     </xsl:if>
   </xsl:template>
   
