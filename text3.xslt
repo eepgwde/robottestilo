@@ -35,25 +35,16 @@
 
   <xsl:template match="*/*[@clickable = 'true']">
     <xsl:if test="@clickable = 'true'">
-      <xsl:text>-- &#10;&#10;</xsl:text>
-      <xsl:text>clk.text.</xsl:text>
+      <xsl:text>-- CLICKABLE&#10;</xsl:text>
+      <xsl:text>clk.cls.</xsl:text>
       <xsl:value-of select="position()"/>
       <xsl:text>=</xsl:text>
-      <xsl:value-of select="substring(@text,1,80)"/>
+      <xsl:value-of select="local-name()"/>
       <xsl:text>&#10;</xsl:text>
-
       <xsl:text>clk.path.</xsl:text>
       <xsl:value-of select="position()"/>
       <xsl:text>=</xsl:text>
       <xsl:value-of select="path()"/>
-      <xsl:text>&#10;</xsl:text>
-
-      <xsl:text>clk.class.</xsl:text>
-      <xsl:value-of select="position()"/>
-      <xsl:text>=</xsl:text>
-      <xsl:value-of select="@class"/>
-      <xsl:text>|</xsl:text>
-      <xsl:value-of select="local-name()"/>
       <xsl:text>&#10;</xsl:text>
 
       <xsl:for-each select="./*[@text != '']">
@@ -68,7 +59,7 @@
 	<xsl:value-of select="path()"/>
 	<xsl:text>&#10;</xsl:text>
 
-	<xsl:text>txt.class.</xsl:text>
+	<xsl:text>txt.cls.</xsl:text>
 	<xsl:value-of select="position()"/>
 	<xsl:text>=</xsl:text>
 	<xsl:value-of select="local-name()"/>
