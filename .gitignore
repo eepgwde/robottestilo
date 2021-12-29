@@ -1,5 +1,7 @@
 *~
-pages/*
+pages
+pages/
+cache/
 .temp
 .knownPackages
 platform-tools
@@ -21,5 +23,22 @@ bak/*
 btools
 android
 
-.#*
-#*
+appium-*.log
+*.sums
+t.*
+nohup.out
+
+make.log
+emulator.log
+
+**/.#*
+**/#*
+
+appium-boilerplate/
+wdio0/
+xtra/
+pages/
+*.zip
+session.json
+session.json-id
+session-create.out

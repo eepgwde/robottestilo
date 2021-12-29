@@ -111,7 +111,15 @@ EOF
 
 d_json_pp () {
     # pretty print JSON
-    $nodo python3 -m json.tool
+    $nodo python3 -m json.tool $@
+}
+
+# Removes colourisation from log files.
+d_clean () {
+    for d_file in $@
+    do
+	sed -i -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" $@
+    done
 }
 
 d_applog () {
@@ -197,11 +205,13 @@ d_app () {
 	    ;;
 
 	cmd1)
-	    $nodo curl -s -H 'Content-type: application/json' $* 
+	    $nodo curl -s $d_options -H 'Content-type: application/json' $@ ${d_file:+-f ${d_file}}
 	    ;;
 
 	cmd2)
 	    : ${d_dir:=$PWD}
+
+	    : ${d_service:=$X_HOST}
 	    : ${d_service:=http://127.0.0.1:4723/wd/hub}
 
 	    test -f ${d_dir}/session.json-id || return 2
@@ -212,8 +222,17 @@ d_app () {
 
 	    read cmd < <(echo "$@" | sed -e 's,:session_id/,'$sid/',g')
 	    
-	    $nodo curl -s "${d_service}${cmd}"
+	    
+	    $nodo curl -s $d_options "${d_service}${cmd}" ${d_file+"-f "${d_file}}
 	    ;;
+	cmd3)
+	    # d_file is now args -f filename
+	    local e_file=$($prog -d etc/appium mr "${d_file}")
+	    : ${d_file:=etc/appium/username.json}
+	    : ${d_file:=$e_file}
+
+	    $FUNCNAME cmd1 
+	;;
 
 	session-isnull)
 	    read sid < <($FUNCNAME session-list | jq -r '.value[0]')
@@ -245,6 +264,13 @@ d_app () {
 		    echo $mr
 		fi
 	    fi
+	    ;;
+
+	pages-clean)
+	    : ${d_dir:=$PWD/pages}
+	    test -d $d_dir || return 2
+	    
+	    find $d_dir -type f -name 'w*' -exec grep -sq '"unknown error"' {} \; -delete
 	    ;;
 
 	page-pages)
@@ -556,9 +582,67 @@ d_xml () {
     local xml=xmlstarlet
 
     : ${d_dir:=pages}
-    : ${d_file:=$($prog -d "$d_dir" mr 'w*')}
+    : ${d_file:=$($prog -d "$d_dir" mr 'w*.xml')}
+
+    typeset -a SIG
+    SIG=()
+
+    # Slightly different XPath syntax
+    SIG+=('/hierarchy//*[*/@resource-id = "canvasm.myo2:id/radio"]')
+    SIG+=('/hierarchy//*/android.widget.RadioButton')
+    SIG+=('//*[*/@clickable = '\''true'\'']')
+    SIG+=('//*[*/@text != '\'\'']')
+    SIG+=('//*[*/@resource-id != '\'\'']')
+    SIG+=('/hierarchy//*/android.widget.EditText')
+    SIG+=('/hierarchy//*/android.widget.TextView')
+    SIG+=('/hierarchy//*/androidx.drawerlayout.widget.DrawerLayout')
 
     case $cmd in
+	tags)
+	    ls ${d_dir}/w*.xml | sort -u | sed 's/\..*$//g' | while read i
+	    do
+		echo touch ${i}.'*'
+	    done
+	    ;;
+	pics)
+	    for d_file in ${d_dir}/w*.xml2
+	    do
+		$FUNCNAME pic
+	    done
+	    ;;
+
+	pic)
+	    local tfile=${d_file%%.*}.png
+	    base64 -d $d_file > $tfile
+	    ;;
+	
+	texts)
+	    for d_file in ${d_dir}/w*.xml
+	    do
+		cat ${d_file}1 ; printf "\n"
+		$FUNCNAME text
+	    done
+	    ;;
+
+	signatures)
+	    for d_file in ${d_dir}/w*.xml
+	    do
+		$FUNCNAME signature
+	    done
+	    ;;
+
+	signature)
+	    ## This should match the appium-boilerplate NewPage.signature method given in .xml1
+	    local tfile=${d_file%%.xml}
+	    test -f ${tfile}.xml1 || return 2
+
+	    cat ${tfile}.xml1 ; printf " "
+
+	    for x in "${SIG[@]}"
+	    do
+		$nodo $xml sel -T -t -v 'count('"$x"')' -n $d_file 
+	    done | xargs
+	    ;;
 	structure)
 	    $nodo $xml sel -T -t -m '//*' -m 'ancestor-or-self::*' -v 'name()' -i 'not(position()=last())' -o . -b -b -n $d_file
 	    ;;
@@ -577,6 +661,9 @@ d_xml () {
 	    ;;
 	clickable)
 	    $nodo $xml sel -t -c "/hierarchy//*[*/@clickable = 'true']" -n $d_file
+	    ;;
+	resource-id-1)
+	    $nodo $xml sel -t -c "/hierarchy//*[*/@resource-id != '']" -n $d_file
 	    ;;
 	text-nonempty)
 	    $nodo $xml ed -d "/hierarchy//*[*/@text != '']" $d_file
@@ -600,7 +687,8 @@ d_xml () {
 	    done
 	    ;;
 	*)
-	    $nodo $xml tr ${cmd}.xsl*  $d_file
+	    test -f "${cmd}.xslt" || return 8
+	    $nodo $xml tr ${cmd}.xslt $d_file
 	    ;;
 	    
     esac

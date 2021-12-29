@@ -567,4 +567,233 @@ appium/node_modules/appium-uiautomator2-driver/lib/driver.js:230:7)
 2021-12-03 09:55:38:133 [W3C]     at AppiumDriver.createSession (/usr/local/lib/node_modules/appium/lib/ap
 pium.js:387:35)
 
+# Apple XCode Tools
+
+# Appium RESTful API
+
+## Page Source
+
+ hlpr app page 
+
+## Keyboard Input
+
+Appium Inspector cannot send keyboard input using its implementation.
+
+The Appium for the interaction with the Java client shows the use of only W3C commands.
+
+https://appium.io/docs/en/commands/interactions/actions/
+
+The Actions in the Interactions section.
+
+These sections from Appium log show the Java client doing this work.
+
+It finds the edit text element box. canvasm.myo2:id/login_input_login_name
+
+2021-12-24 21:52:06:294 [W3C (cf9a7d33)] Calling AppiumDriver.findElement() with args: ["id","canvasm.myo2:id/login_input_login_name","cf9a7d33-02eb-4935-b797-e0ddffb4aa55"]
+2021-12-24 21:52:06:294 [BaseDriver] Valid locator strategies for this request: xpath, id, class name, accessibility id, css selector, -android uiautomator
+2021-12-24 21:52:06:294 [BaseDriver] Waiting up to 15000 ms for condition
+2021-12-24 21:52:06:295 [WD Proxy] Matched '/element' to command name 'findElement'
+2021-12-24 21:52:06:295 [WD Proxy] Proxying [POST /element] to [POST http://127.0.0.1:8200/wd/hub/session/e0db4229-e013-4e42-99ba-2d7bbf151f7f/element] with body: {"strategy":"id","selector":"canvasm.myo2:id/login_input_login_name","context":"","multiple":false}
+2021-12-24 21:52:06:329 [WD Proxy] Got response with status 200: {"sessionId":"e0db4229-e013-4e42-99ba-2d7bbf151f7f","value":{"ELEMENT":"00000000-0000-000a-ffff-ffff0000003c","element-6066-11e4-a52e-4f735466cecf":"00000000-0000-000a-ffff-ffff0000003c"}}
+2021-12-24 21:52:06:329 [W3C (cf9a7d33)] Responding to client with driver.findElement() result: {"element-6066-11e4-a52e-4f735466cecf":"00000000-0000-000a-ffff-ffff0000003c","ELEMENT":"00000000-0000-000a-ffff-ffff0000003c"}
+2021-12-24 21:52:06:329 [HTTP] <-- POST /wd/hub/session/cf9a7d33-02eb-4935-b797-e0ddffb4aa55/element 200 36 ms - 137
+2021-12-24 21:52:06:329 [HTTP] 
+2021-12-24 21:52:06:331 [HTTP] --> GET /wd/hub/session/cf9a7d33-02eb-4935-b797-e0ddffb4aa55/element/00000000-0000-000a-ffff-ffff0000003c/displayed
+2021-12-24 21:52:06:332 [HTTP] {}
+
+The last GET might make the element active. It then posts a click.
+
+    2021-12-24 21:52:06:933 [WD Proxy] Proxying [POST /element/00000000-0000-000a-ffff-ffff0000003c/click] to [POST http://127.0.0.1:8200/wd/hub/session/e0db4229-e013-4e42-99ba-2d7bbf151f7f/element/00000000-0000-000a-ffff-ffff0000003c/click] with body: {"element":"00000000-0000-000a-ffff-ffff0000003c"}
+
+And eventually a POST is made using
+
+2021-12-24 21:52:06:933 [WD Proxy] Proxying [POST /element/00000000-0000-000a-ffff-ffff0000003c/click] to [POST http://127.0.0.1:8200/wd/hub/session/e0db4229-e013-4e42-99ba-2d7bbf151f7f/element/00000000-0000-000a-ffff-ffff0000003c/click] with body: {"element":"00000000-0000-000a-ffff-ffff0000003c"}
+2021-12-24 21:52:06:978 [WD Proxy] Got response with status 200: {"sessionId":"e0db4229-e013-4e42-99ba-2d7bbf151f7f","value":null}
+2021-12-24 21:52:06:978 [W3C (cf9a7d33)] Responding to client with driver.click() result: null
+2021-12-24 21:52:06:979 [HTTP] <-- POST /wd/hub/session/cf9a7d33-02eb-4935-b797-e0ddffb4aa55/element/00000000-0000-000a-ffff-ffff0000003c/click 200 46 ms - 14
+2021-12-24 21:52:06:979 [HTTP] 
+2021-12-24 21:52:06:993 [HTTP] --> POST /wd/hub/session/cf9a7d33-02eb-4935-b797-e0ddffb4aa55/actions
+2021-12-24 21:52:06:993 [HTTP] {"actions":[{"type":"key","actions":[{"type":"keyDown","value":"o"},{"type":"keyUp","value":"o"},{"type":"keyDown","value":"2"},{"type":"keyUp","value":"2"},{"type":"keyDown","value":"u"},{"type":"keyUp","value":"u"},{"type":"keyDown","value":"d"},{"type":"keyUp","value":"d"},{"type":"keyDown","value":"o"},{"type":"keyUp","value":"o"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"2"},{"type":"keyUp","value":"2"}],"id":"default keyboard"}]}
+2021-12-24 21:52:06:994 [W3C (cf9a7d33)] Calling AppiumDriver.performActions() with args: [[{"type":"key","actions":[{"type":"keyDown","value":"o"},{"type":"keyUp","value":"o"},{"type":"keyDown","value":"2"},{"type":"keyUp","value":"2"},{"type":"keyDown","value":"u"},{"type":"keyUp","value":"u"},{"type":"keyDown","value":"d"},{"type":"keyUp","value":"d"},{"type":"keyDown","value":"o"},{"type":"keyUp","value":"o"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"2"},{"type":"keyUp","value":"2"}],"id":"default keyboard"}],"cf9a7d33-02eb-4935-b797-e0ddffb4aa55"]
+
+The JSON POST is this.
+
+POST /wd/hub/session/cf9a7d33-02eb-4935-b797-e0ddffb4aa55/actions
+
+with 
+
+{"actions":[{"type":"key","actions":[{"type":"keyDown","value":"o"},{"type":"keyUp","value":"o"},{"type":"keyDown","value":"2"},{"type":"keyUp","value":"2"},{"type":"keyDown","value":"u"},{"type":"keyUp","value":"u"},{"type":"keyDown","value":"d"},{"type":"keyUp","value":"d"},{"type":"keyDown","value":"o"},{"type":"keyUp","value":"o"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"0"},{"type":"keyUp","value":"0"},{"type":"keyDown","value":"2"},{"type":"keyUp","value":"2"}],"id":"default keyboard"}]}
+
+which is this:
+
+{
+    "actions": [
+        {
+            "type": "key",
+            "actions": [
+                {
+                    "type": "keyDown",
+                    "value": "o"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "o"
+                },
+                {
+                    "type": "keyDown",
+                    "value": "2"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "2"
+                },
+                {
+                    "type": "keyDown",
+                    "value": "u"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "u"
+                },
+                {
+                    "type": "keyDown",
+                    "value": "d"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "d"
+                },
+                {
+                    "type": "keyDown",
+                    "value": "o"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "o"
+                },
+                {
+                    "type": "keyDown",
+                    "value": "0"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "0"
+                },
+                {
+                    "type": "keyDown",
+                    "value": "0"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "0"
+                },
+                {
+                    "type": "keyDown",
+                    "value": "0"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "0"
+                },
+                {
+                    "type": "keyDown",
+                    "value": "0"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "0"
+                },
+                {
+                    "type": "keyDown",
+                    "value": "0"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "0"
+                },
+                {
+                    "type": "keyDown",
+                    "value": "0"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "0"
+                },
+                {
+                    "type": "keyDown",
+                    "value": "0"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "0"
+                },
+                {
+                    "type": "keyDown",
+                    "value": "2"
+                },
+                {
+                    "type": "keyUp",
+                    "value": "2"
+                }
+            ],
+            "id": "default keyboard"
+        }
+    ]
+}
+
+which is very verbose. Then a hide keyboard - no sign of an enter.
+
+Then find and select the password field click that. And do the same. Eventually, a
+carriage return or something and is completed.
+
+ https://appium.io/docs/en/commands/interactions/actions/#actions
+
+Only the WebDriverIO javascript driver has both Actions and Attach To Session.
+
+On Cygwin using Windows installation of Nodejs.
+
+https://digital.ai/catalyst-blog/how-to-get-started-using-webdriverio-with-experitest
+
+and do their npx wdio config. Then try this:
+
+https://github.com/webdriverio/appium-boilerplate.git
+
+If you have Intellij Ultimate you can use JavaScript plugins and get the WebDriverIO
+plugin.
+
+You can add
+
+    await browser.debug()
+
+to any test to go into REPL mode.
+
+I can't find any documentation on the debugger commands. It is the regular Node.js
+debugger 
+
+.exit
+.help
+
+and one can run any command, but not access the stack frame.
+
+console.log('message')
+
+  browser: this,
+  driver: this,
+  $: this.$.bind(this),
+  $$: this.$$.bind(this)
+
+.editor
+.help
+
+
+[  Local Variables: ]
+[  mode:text ]
+[  mode:outline-minor ]
+[  mode:auto-fill ]
+[  fill-column: 75 ]
+[  coding: utf-8 ]
+[  comment-column:50 ]
+[  comment-start: "[  "  ]
+[  comment-end:"]" ]
+[  End: ]
 
