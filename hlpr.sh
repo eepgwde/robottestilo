@@ -114,6 +114,10 @@ d_json_pp () {
     $nodo python3 -m json.tool $@
 }
 
+d_jq_kv () {
+    $nodo jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' $@
+}
+
 # Removes colourisation from log files.
 d_clean () {
     for d_file in $@
@@ -632,18 +636,18 @@ d_xml () {
 	    local tfile=${d_file%%.*}.png
 	    base64 -d $d_file > $tfile
 	    ;;
-	
+
 	## This should match the appium-boilerplate NewPage.signature method given in .xml1
 	signature)
 	    local tfile=${d_file%%.xml}
 	    test -f ${tfile}.xml1 || return 2
 
-	    cat ${tfile}.xml1 ; printf " "
+	    d_jq_kv ${tfile}.xml1
 
 	    for x in "${SIG[@]}"
 	    do
 		$nodo $xml sel -T -t -v 'count('"$x"')' -n $d_file 
-	    done | xargs
+	    done | xargs echo signatur1= | sed -e 's/=./=/g' | sed -e 's/ /,/g'
 	    ;;
 	
 	structure)
@@ -689,24 +693,43 @@ d_xml () {
 	    done
 	    ;;
 	
+	
 	## Batch processing uses a different function and only works on .xslt files
 	# text3.xslt needs to use Saxon or other XSLT v2.0
 
 	*s) # if it ends is "s" run it on all the files in pages/  and
 	    # use d_xsltp() to do so
-	    local e_file=${cmd%%s}.xslt
-	    test -f "${e_file}" || return 2
 	    : ${d_service:=cache}
 	    test -d "${d_service}" || mkdir -p "${d_service}"
+	    : ${d_port:=.properties}
+
+	    local e_file
+
+	    case ${cmd} in
+		signatures)
+		    true
+		;;
+		*s)
+		    e_file=${cmd%%s}.xslt
+		    test -f "${e_file}" || return 2
+		;;
+	    esac
 
 	    local tfile
 	    for d_file in ${d_dir}/w*.xml
 	    do
 		tfile=${d_file##*/}; tfile=${tfile%%.xml}
-		
-		d_log=${d_service}/${tfile}-${cmd%%s}.properties
+		d_log=${d_service}/${tfile}-${cmd%%s}${d_port}
 		echo $tfile $d_file $d_log > $verbose
-		d_xsltp ${e_file}
+
+		case ${cmd} in
+		    signatures)
+			$FUNCNAME signature > $d_log
+		    ;;
+		    *s)
+			d_xsltp ${e_file}
+		    ;;
+		esac
 	    done
 	    ;;
 
