@@ -48,6 +48,14 @@
       <xsl:value-of select="substring(@text,1,80)"/>
       <xsl:text>&#10;</xsl:text>
 
+      <xsl:text>clk.desc.</xsl:text>
+      <xsl:value-of select="$id0"/>
+      <xsl:text>.</xsl:text>
+      <xsl:value-of select="$id1"/>
+      <xsl:text>=</xsl:text>
+      <xsl:value-of select="substring(@content-desc,1,80)"/>
+      <xsl:text>&#10;</xsl:text>
+
       <xsl:text>clk.cls.</xsl:text>
       <xsl:value-of select="$id0"/>
       <xsl:text>.</xsl:text>

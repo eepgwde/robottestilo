@@ -19,68 +19,23 @@
       </minprice>
       }
       </results>
-
-    <xsl:apply-templates select="node()|@*"/>
-    <xsl:apply-templates select="node()|@*"/>
-
-  <xsl:template match="node()|@*">
-    <xsl:apply-templates select="node()|@*"/>
-  </xsl:template>
-
   -->
 
   <xsl:template match="node()|@*">
     <xsl:apply-templates select="node()|@*"/>
   </xsl:template>
-
-  <xsl:template match="*/*[@clickable = 'true']">
-    <xsl:if test="@clickable = 'true'">
-      <xsl:text>clk.text.</xsl:text>
-      <xsl:value-of select="position()"/>
-      <xsl:text>=</xsl:text>
-      <xsl:value-of select="substring(@text,1,80)"/>
-      <xsl:text>&#10;</xsl:text>
-
-      <xsl:text>clk.path.</xsl:text>
-      <xsl:value-of select="position()"/>
-      <xsl:text>=</xsl:text>
-      <xsl:value-of select="path()"/>
-      <xsl:text>&#10;</xsl:text>
-
-      <xsl:text>clk.class.</xsl:text>
-      <xsl:value-of select="position()"/>
-      <xsl:text>=</xsl:text>
-      <xsl:value-of select="@class"/>
-      <xsl:text>|</xsl:text>
-      <xsl:value-of select="local-name()"/>
-      <xsl:text>&#10;&#10;</xsl:text>
-    </xsl:if>
-    <xsl:apply-templates select="child::*"/>
-  </xsl:template>
-
-  <xsl:template match="*/*[@text != '']">
-    <xsl:if test="string-length(@text) &gt; 0">
-      <xsl:text>txt.text.</xsl:text>
-      <xsl:value-of select="position()"/>
-      <xsl:text>=</xsl:text>
-      <xsl:value-of select="substring(@text,1,80)"/>
-      <xsl:text>&#10;</xsl:text>
-
-      <xsl:text>txt.path.</xsl:text>
-      <xsl:value-of select="position()"/>
-      <xsl:text>=</xsl:text>
-      <xsl:value-of select="path()"/>
-      <xsl:text>&#10;</xsl:text>
-
-      <xsl:text>txt.class.</xsl:text>
-      <xsl:value-of select="position()"/>
-      <xsl:text>=</xsl:text>
-      <xsl:value-of select="@class"/>
-      <xsl:text>|</xsl:text>
-      <xsl:value-of select="local-name()"/>
-      <xsl:text>&#10;&#10;</xsl:text>
-    </xsl:if>
-    <xsl:apply-templates select="node()|@*"/>
-  </xsl:template>
   
+  <xsl:template match="*[*/@text != '']">
+      <xsl:text>page.textv.resource-id=</xsl:text>
+
+      <xsl:value-of select="substring(./@resource-id,1,80)"/>
+      <xsl:text>|</xsl:text>
+
+      <xsl:value-of select="./@bounds"/>
+      <xsl:text>|</xsl:text>
+
+      <xsl:value-of select="./@class"/>
+      <xsl:text>&#10;</xsl:text>
+  </xsl:template>
+
 </xsl:stylesheet>

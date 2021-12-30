@@ -573,7 +573,29 @@ EOF
     esac
 }
 
-## Some basic XML
+## XSLT processing
+# originally just xmlstarlet, and xsltproc, but moved up to Saxon on Cygwin
+# so the XSLT processor is wrapped in a function using d_file and others.
+# see the case " *s) # if it ends is "s" run it on all the files in pages/"
+
+# see hlpr.def
+# d_xsltp () {
+#     $nodo "$XSLTP" -s:$(cygpath -w $d_file) -xsl:$(cygpath -w ${1}) -o:$(cygpath -w ${d_log})
+# }
+
+if [[ $(type -t d_xsltp) == function ]]
+then
+    true
+else
+
+: ${XSLTP:=xsltproc}
+d_xsltp () {
+ $nodo "$XSLTP" -o $(cygpath -w ${d_log})  ${1} $d_file
+}
+
+fi
+
+## Some many XML operations.
 
 d_xml () {
     test $# -ge 1 || return 1
@@ -584,6 +606,7 @@ d_xml () {
     : ${d_dir:=pages}
     : ${d_file:=$($prog -d "$d_dir" mr 'w*.xml')}
 
+    ## These are used to compare to the signatures in .xml1
     typeset -a SIG
     SIG=()
 
@@ -598,41 +621,20 @@ d_xml () {
     SIG+=('/hierarchy//*/androidx.drawerlayout.widget.DrawerLayout')
 
     case $cmd in
-	tags)
-	    ls ${d_dir}/w*.xml | sort -u | sed 's/\..*$//g' | while read i
-	    do
-		echo touch ${i}.'*'
-	    done
-	    ;;
-	pics)
+	pics) # process all the image files
 	    for d_file in ${d_dir}/w*.xml2
 	    do
 		$FUNCNAME pic
 	    done
 	    ;;
 
-	pic)
+	pic) # process one
 	    local tfile=${d_file%%.*}.png
 	    base64 -d $d_file > $tfile
 	    ;;
 	
-	texts)
-	    for d_file in ${d_dir}/w*.xml
-	    do
-		cat ${d_file}1 ; printf "\n"
-		$FUNCNAME text
-	    done
-	    ;;
-
-	signatures)
-	    for d_file in ${d_dir}/w*.xml
-	    do
-		$FUNCNAME signature
-	    done
-	    ;;
-
+	## This should match the appium-boilerplate NewPage.signature method given in .xml1
 	signature)
-	    ## This should match the appium-boilerplate NewPage.signature method given in .xml1
 	    local tfile=${d_file%%.xml}
 	    test -f ${tfile}.xml1 || return 2
 
@@ -643,6 +645,7 @@ d_xml () {
 		$nodo $xml sel -T -t -v 'count('"$x"')' -n $d_file 
 	    done | xargs
 	    ;;
+	
 	structure)
 	    $nodo $xml sel -T -t -m '//*' -m 'ancestor-or-self::*' -v 'name()' -i 'not(position()=last())' -o . -b -b -n $d_file
 	    ;;
@@ -671,25 +674,60 @@ d_xml () {
 	text-empty)
 	    $nodo $xml sel -t -c "/hierarchy//*[*/@text = '']" -n $d_file
 	    ;;
+	
 	cmdline)
 	    # "/hierarchy/@index" => all hierarchy 0
 	    # "//@resource-id" 
-	    $nodo xmlstarlet sel -T -t -v $* $d_file
+	    $nodo $xml sel -T -t -v $* $d_file
 	    ;;
+
+	## This generates a touch commmand to update a particular hashcode*.xml* of files
+	tags)
+	    ls ${d_dir}/w*.xml | sort -u | sed 's/\..*$//g' | while read i
+	    do
+		echo touch ${i}.'*'
+	    done
+	    ;;
+	
+	## Batch processing uses a different function and only works on .xslt files
+	# text3.xslt needs to use Saxon or other XSLT v2.0
+
+	*s) # if it ends is "s" run it on all the files in pages/  and
+	    # use d_xsltp() to do so
+	    local e_file=${cmd%%s}.xslt
+	    test -f "${e_file}" || return 2
+	    : ${d_service:=cache}
+	    test -d "${d_service}" || mkdir -p "${d_service}"
+
+	    local tfile
+	    for d_file in ${d_dir}/w*.xml
+	    do
+		tfile=${d_file##*/}; tfile=${tfile%%.xml}
+		
+		d_log=${d_service}/${tfile}-${cmd%%s}.properties
+		echo $tfile $d_file $d_log > $verbose
+		d_xsltp ${e_file}
+	    done
+	    ;;
+
 	all)
 	    test -n "$d_service" || return 4
 	    test -f "$d_service" || return 2
 	    
 	    for d_file in $(cat $d_service | xargs)
 	    do
-		echo -- $d_file
+		echo -- $d_file > $verbose
 		$FUNCNAME $d_service $*
 	    done
 	    ;;
+
+	## Using a file
+
 	*)
 	    test -f "${cmd}.xslt" || return 8
 	    $nodo $xml tr ${cmd}.xslt $d_file
 	    ;;
+	
 	    
     esac
     
