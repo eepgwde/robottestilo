@@ -5,27 +5,26 @@
 
   <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes" omit-xml-declaration="yes"/>
 
-  <!-- In the document "prices.xml", find the minimum price for each book, in the form of a "minprice" element with the book title as its title attribute. -->
+  <!-- 
+       weaves
+
+       This processes Appium W3C captured pages.
+       (Currently, only Android App XML pages.)
+
+       It looks for any clickable elements and then finds the text elements below it.
+       It records the XPath, it uses path() from XSLT version 2.0 so you will need
+       Saxon. 
+
+       Attributes transferred are text, content-desc and bounds. The bounds gives you a 
+       clue where the clickable element lies. They are in top to bottom order.
+
+  -->
 
   <!--
-      <results>
-      {
-      let $doc := document("prices.xml")
-      for $t in distinct-values($doc//book/title)
-      let $p := $doc//book[title = $t]/price
-      return
-      <minprice title={ $t/text() }>
-      <price>{ min(decimal($p/text())) }</price>
-      </minprice>
-      }
-      </results>
-
-<xsl:apply-templates select="node()|@*"/>
-<xsl:apply-templates select="node()|@*"/>
 
 <xsl:template match="node()|@*">
+
 <xsl:apply-templates select="node()|@*"/>
-</xsl:template>
 
   -->
 
@@ -64,6 +63,14 @@
       <xsl:value-of select="local-name()"/>
       <xsl:text>&#10;</xsl:text>
 
+      <xsl:text>clk.bounds.</xsl:text>
+      <xsl:value-of select="$id0"/>
+      <xsl:text>.</xsl:text>
+      <xsl:value-of select="$id1"/>
+      <xsl:text>=</xsl:text>
+      <xsl:value-of select="@bounds"/>
+      <xsl:text>&#10;</xsl:text>
+
       <xsl:text>clk.path.</xsl:text>
       <xsl:value-of select="$id0"/>
       <xsl:text>.</xsl:text>
@@ -72,7 +79,7 @@
       <xsl:value-of select="replace(path(), '(Q\{\})', '')"/>
       <xsl:text>&#10;</xsl:text>
 
-      <xsl:for-each select="./*[@text != '']">
+      <xsl:for-each select="./*[(@text != '') or (@content-desc != '')]">
 
 	<xsl:text>## clickable text&#10;</xsl:text>
 	<xsl:text>txt.text.</xsl:text>
@@ -85,6 +92,16 @@
 	<xsl:value-of select="substring(@text,1,80)"/>
 	<xsl:text>&#10;</xsl:text>
 
+	<xsl:text>txt.desc.</xsl:text>
+	<xsl:value-of select="$id0"/>
+	<xsl:text>.</xsl:text>
+	<xsl:value-of select="$id1"/>
+	<xsl:text>.</xsl:text>
+	<xsl:value-of select="position()"/>
+	<xsl:text>=</xsl:text>
+	<xsl:value-of select="substring(@content-desc,1,80)"/>
+	<xsl:text>&#10;</xsl:text>
+
 	<xsl:text>txt.cls.</xsl:text>
 	<xsl:value-of select="$id0"/>
 	<xsl:text>.</xsl:text>
@@ -93,6 +110,16 @@
 	<xsl:value-of select="position()"/>
 	<xsl:text>=</xsl:text>
 	<xsl:value-of select="local-name()"/>
+	<xsl:text>&#10;</xsl:text>
+
+	<xsl:text>txt.bounds.</xsl:text>
+	<xsl:value-of select="$id0"/>
+	<xsl:text>.</xsl:text>
+	<xsl:value-of select="$id1"/>
+	<xsl:text>=</xsl:text>
+	<xsl:value-of select="position()"/>
+	<xsl:text>=</xsl:text>
+	<xsl:value-of select="@bounds"/>
 	<xsl:text>&#10;</xsl:text>
 
 	<xsl:text>txt.path.</xsl:text>
@@ -105,7 +132,7 @@
 	<xsl:value-of select="replace(path(), '(Q\{\})', '')"/>
 	<xsl:text>&#10;</xsl:text>
 
-</xsl:for-each>
+      </xsl:for-each>
     </xsl:if>
   </xsl:template>
   

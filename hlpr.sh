@@ -685,12 +685,25 @@ d_xml () {
 	    $nodo $xml sel -T -t -v $* $d_file
 	    ;;
 
-	## This generates a touch commmand to update a particular hashcode*.xml* of files
+	## This generates a list of base files - the hashcode
 	tags)
-	    ls ${d_dir}/w*.xml | sort -u | sed 's/\..*$//g' | while read i
+	    # usually you want to concatenate all the files in cache/ 
+	    : ${d_service:="*"}
+	    ls ${d_dir}/${d_service} | sed 's/\..*$//g' | sort -u 
+	    ;;
+
+	descs)
+	    # are made of -click and -signature files and are written to _desc files.
+	    : ${d_port:=.properties}
+	    local tfile=${cmd%%s}
+
+	    $prog -d cache xml tags | egrep -- -'(click|signature)$' | xargs -n2 | while read i j
 	    do
-		echo touch ${i}.'*'
+		x0="$(echo ${j} | sed -e 's/-signature/_'${tfile}'/g')"${d_port}
+		echo ${j}.properties ${i}.properties $x0 > $verbose
+		cat ${j}.properties ${i}.properties > $x0
 	    done
+		
 	    ;;
 	
 	
@@ -748,7 +761,9 @@ d_xml () {
 
 	*)
 	    test -f "${cmd}.xslt" || return 8
-	    $nodo $xml tr ${cmd}.xslt $d_file
+	    d_log=$(mktemp)
+	    f_tpush $d_log
+	    d_xsltp ${cmd}.xslt && cat $d_log
 	    ;;
 	
 	    
