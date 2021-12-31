@@ -16,16 +16,14 @@
        Saxon. 
 
        Attributes transferred are text, content-desc and bounds. The bounds gives you a 
-       clue where the clickable element lies. They are in top to bottom order.
+       clue where the clickable element lies. They should be in top to bottom order.
 
   -->
 
-  <!--
+  <!-- Some useful fields.
 
-<xsl:template match="node()|@*">
-
-<xsl:apply-templates select="node()|@*"/>
-
+       <xsl:template match="node()|@*">
+       <xsl:apply-templates select="node()|@*"/>
   -->
 
   <xsl:template match="node()|@*">

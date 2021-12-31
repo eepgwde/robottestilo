@@ -2,6 +2,8 @@
 
 ## Post-process the snapshot pages and categorize
 
+# Now out-of-date: no longer using xsltproc
+
 # The EditText and RadioButton items have text and are distinctive for each page
 
 # Extract these and put them into a file for each page captured.
