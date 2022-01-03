@@ -24,9 +24,11 @@ EOF
 d_mr () {
     : ${d_dir:=.}
 
+    : ${FIND:=find}
+
     if [ $# -ge 1 ]
     then
-        find -L "$d_dir" -maxdepth 1 -type f -name "$*" -printf "%T@ " -print | sort -rnk1 | head -1 | cut -d' ' --complement -f1 
+        $FIND -L "$d_dir" -maxdepth 1 -type f -name "$*" -printf "%T@ " -print | sort -rnk1 | head -1 | cut -d' ' -f2-
     else
         ls -t "$d_dir" | head -1 | sed 's,^,'""${d_dir}""'/,g'
     fi
