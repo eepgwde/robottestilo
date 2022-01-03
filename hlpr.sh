@@ -615,14 +615,14 @@ d_xml () {
     SIG=()
 
     # Slightly different XPath syntax
-    SIG+=('/hierarchy//*[*/@resource-id = "canvasm.myo2:id/radio"]')
-    SIG+=('/hierarchy//*/android.widget.RadioButton')
+    SIG+=('//*[*/@resource-id = "canvasm.myo2:id/radio"]')
+    SIG+=('//*/android.widget.RadioButton')
     SIG+=('//*[*/@clickable = '\''true'\'']')
     SIG+=('//*[*/@text != '\'\'']')
     SIG+=('//*[*/@resource-id != '\'\'']')
-    SIG+=('/hierarchy//*/android.widget.EditText')
-    SIG+=('/hierarchy//*/android.widget.TextView')
-    SIG+=('/hierarchy//*/androidx.drawerlayout.widget.DrawerLayout')
+    SIG+=('//*/android.widget.EditText')
+    SIG+=('//*/android.widget.TextView')
+    SIG+=('//*/androidx.drawerlayout.widget.DrawerLayout')
 
     case $cmd in
 	pics) # process all the image files
@@ -654,33 +654,33 @@ d_xml () {
 	    $nodo $xml sel -T -t -m '//*' -m 'ancestor-or-self::*' -v 'name()' -i 'not(position()=last())' -o . -b -b -n $d_file
 	    ;;
 	textview)
-	    $nodo $xml sel -t -c "/hierarchy//*/android.widget.TextView" -n $d_file
+	    $nodo $xml sel -t -c "//*/android.widget.TextView" -n $d_file
 	    ;;
 	clickable-radiobutton)
-	    $nodo $xml sel -t -c "/hierarchy//*[android.widget.RadioButton/@clickable = 'true']" -n $d_file
+	    $nodo $xml sel -t -c "//*[android.widget.RadioButton/@clickable = 'true']" -n $d_file
 	    ;;
 	clickable-edittext)
-	    $nodo $xml sel -t -c "/hierarchy//*[android.widget.EditText/@clickable = 'true']" -n $d_file
+	    $nodo $xml sel -t -c "//*[android.widget.EditText/@clickable = 'true']" -n $d_file
 	    ;;
 	clickable-nonempty)
 	    ## This never produces
-	    $nodo $xml sel -t -c "/hierarchy//*[*/@clickable = 'true' and @text != '']" -n $d_file
+	    $nodo $xml sel -t -c "//*[*/@clickable = 'true' and @text != '']" -n $d_file
 	    ;;
 	clickable)
-	    $nodo $xml sel -t -c "/hierarchy//*[*/@clickable = 'true']" -n $d_file
+	    $nodo $xml sel -t -c "//*[*/@clickable = 'true']" -n $d_file
 	    ;;
 	resource-id-1)
-	    $nodo $xml sel -t -c "/hierarchy//*[*/@resource-id != '']" -n $d_file
+	    $nodo $xml sel -t -c "//*[*/@resource-id != '']" -n $d_file
 	    ;;
 	text-nonempty)
-	    $nodo $xml ed -d "/hierarchy//*[*/@text != '']" $d_file
+	    $nodo $xml ed -d "//*[*/@text != '']" $d_file
 	    ;;
 	text-empty)
-	    $nodo $xml sel -t -c "/hierarchy//*[*/@text = '']" -n $d_file
+	    $nodo $xml sel -t -c "//*[*/@text = '']" -n $d_file
 	    ;;
 	
 	cmdline)
-	    # "/hierarchy/@index" => all hierarchy 0
+	    # "//@index" => all hierarchy 0
 	    # "//@resource-id" 
 	    $nodo $xml sel -T -t -v $* $d_file
 	    ;;
