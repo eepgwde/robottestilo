@@ -1,6 +1,6 @@
 if [ -z "$d_port" ]
 then
-d_port=4723
+d_port=4724
 fi
 
 if [ -z "$d_password" ]
@@ -8,12 +8,31 @@ then
 d_password=wd/hub
 fi
 
-d_machine=jenkins
+d_machine=localhost
 
+# Used for the base URL
 X_HOST=http://${d_machine}:${d_port}/${d_password}
 
+FIND="find"
+
+case "$OSTYPE" in
+cygwin) 
 XSLTP="/cygdrive/l/Program Files/SaxonHE10.5N/bin/Transform"
 
 d_xsltp () {
  $nodo "$XSLTP" -s:$(cygpath -w $d_file) -xsl:${1} -o:$(cygpath -w ${d_log})
 }
+;;
+darwin*)
+XSLTP=saxon
+FIND=gfind
+
+d_xsltp () {
+ $nodo "$XSLTP" -s:$d_file -xsl:${1} -o:${d_log}
+}
+;;
+*)
+XSLTP=xsltproc
+;;
+esac
+

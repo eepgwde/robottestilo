@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # weaves
 # This is the super-script. It provides a wrapper around other scripts.
 
@@ -563,7 +563,7 @@ fi
 
 # Remove duplicates (by name not content) and preserve order
 d_asort () {
-    echo $@ | xargs -n1 | awk '{ if (!length(x[$x0])) x[$0]=NR } END { for (i in x) { y[x[i]]=i }; for (i in y) print y[i]; }'
+    echo $@ | xargs -n1 | awk '{ if (!length(x[$0])) x[$0]=NR } END { for (i in x) { y[x[i]]=i }; for (i in y) print y[i]; }'
 }
 
 # Only readarray works
