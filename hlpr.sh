@@ -297,7 +297,7 @@ d_app () {
 	    ;;
 
 	session-list)
-	    $FUNCNAME cmd1 -X GET http://localhost:4723/wd/hub/sessions
+	    $FUNCNAME cmd1 -X GET ${X_HOST}/sessions
 	    # > $tfile
 	    # cat $tfile | jq -r '.value[0].id'
 	    ;;
@@ -322,7 +322,7 @@ d_app () {
 	    e_file=$(mktemp)
 	    f_tpush $tfile
 
-	    $FUNCNAME cmd0 -X POST http://localhost:4723/wd/hub/session -d @${d_file}
+	    $FUNCNAME cmd0 -X POST ${X_HOST}/session -d @${d_file}
 
 	    cp -b $e_file session-create.out
 	    test -s $e_file || return 2

@@ -1,4 +1,16 @@
-# X_HOST=http://192.168.127.1:4723/wd/hub/
+if [ -z "$d_port" ]
+then
+d_port=4723
+fi
+
+if [ -z "$d_password" ]
+then
+d_password=wd/hub
+fi
+
+d_machine=jenkins
+
+X_HOST=http://${d_machine}:${d_port}/${d_password}
 
 XSLTP="/cygdrive/l/Program Files/SaxonHE10.5N/bin/Transform"
 
