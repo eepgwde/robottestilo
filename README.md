@@ -4,15 +4,18 @@ weaves
 
 # Android and Appium Command-Line Tools
 
-These utilities work for Linux and Cygwin on Windows. If anyone manages to get it to work
-on MacOS do let me know. I would like to know If anyone manages to extend this to support
-iOS apps.
+These utilities work for Linux and Cygwin on Windows. It partly works on MacOS.  It does
+not manage the iOS emulator from the command-line, but it can manage the Android one and
+the Appium server. It does perform the XML processing.
 
 ## Installing 
 
-These scripts need to be installed in an Android SDK directory. If you use Android Studio
-to do that, then find your SDK directory and checkout the code from GitHub to here using
-this sequence:
+If you need to control the Android emulator, then these scripts need to be installed in an
+Android SDK directory. If you are only using the XML post-processing, you can install
+somewhere are your convenience.
+
+If you use Android Studio to do that, then find your SDK directory and checkout the code
+from GitHub to here using this sequence:
 
     git init
     git remote add origin PATH/TO/REPO
@@ -34,10 +37,19 @@ here.
 There is also a local copy of my script wrapper m_ here etc/hlpr and that is linked to ./hlpr - it should also
 be executable. I hope it works, it is used a lot.
 
-A quick word about it: hlpr is a wrapper that loads all the shell functions in hlpr.sh. It can also use hlpr.def
+A quick word about it: hlpr is a wrapper that loads all the shell functions in hlpr.sh. It also uses hlpr.def
 for constants. The script hlpr has lots of switches.
 
 When debugging, use it like this: hlpr -n -x
+
+The hlpr.def is used to define the base URL for Appium: usually it is
+http://localhost:4723/wd/hub
+
+These are given in the hlpr.def file. They can be overridden with the command line
+
+    -p 4726 -m jenkins -P /wd/hub1
+
+This would then use  http://jenkins:4726/wd/hub1 as the base URL.
 
 ## What these Shell Scripts, XSLT and GNU Make Files Do
 
@@ -200,15 +212,61 @@ remember what screen appeared for this file or use the comments feature when cap
 You can try out some XPaths on the captured files in pages/. Use the examples in the d_xml
 function of hlpr.sh for guidelines. 
 
-### General Structural Enquiries
+The XSLT processing can be made in batch form. For the files that end in .xslt you can
+process a single file with
 
-#### Structure
+   hlpr xml attname
 
-You can get a sense of the depth and verbosity of the XML files with this
+and the output is sent to standard output.
 
-   hlpr xml structure
+Or you can add an 's' to the filestem and the output will be written, file by file, to the
+cache directory.
 
-It just lists the elements.
+   hlpr xml attnames
+
+### General Structural Enquiries - Android and iOS
+
+#### Attributes and Nodes
+
+This can be useful
+
+   hlpr xml attname
+
+The gets all the attributes names in order. It's a good idea to sort uniquely with
+
+   hlpr xml attname | sort -u
+
+and you should see the attributes used on all the elements. This method is useful for
+checking if you have a non-compliant file.
+
+You can also use
+
+   hlpr xml node (and nodes)
+
+This gives all the nodes and the counts of the occurrences of each node.
+
+#### XPaths
+
+You can get all the XPaths for every attribute from the file.
+
+   hlpr xml xpath
+
+The file will be large. 10000 lines is typical. You can filter it by looking for text
+strings and particular @bounds attributes. This gets a record with non-empty text.
+
+### Android XML Page Processing
+
+Some of the these command use xmlstarlet.
+
+#### Text Elements
+
+For a file to find the non-empty text attributes use
+
+   egrep 'text="[^"]+"' pages/w00001
+
+For the XPath use this
+
+   hlpr xml xpath | egrep '@text='\''.+'\'''
 
 Similarly, you can see the last file's interesting elements:
 
@@ -221,23 +279,6 @@ And general enquiries:
    hlpr xml text-nonempty # anything with text
    hlpr xml clickable # any clickable fields
 
-#### XPath Attributes and Text Elements
-
-##### Attributes
-
-This can be useful
-
-   hlpr xml attnames
-
-The gets all the attributes names in order. It's a good idea to sort uniquely with
-
-   hlpr xml attnames | sort -u
-
-and you should see the attributes used on all the elements. This method is useful for
-checking if you have a non-compliant file.
-
-##### Text Elements
-
 You can get all interesting elements in a Properties file format using this:
 
    hlpr xml text
@@ -249,22 +290,12 @@ You can try text2, but this finds elements that contain elements that contain te
 
    hlpr xml text2
 
-##### XPaths
+All the clickable components can be extracted with
 
-You can get all the XPaths for every attribute from the file.
+  hlpr xml click
 
-   hlpr xml xpath
+These properties files can be used within appium-boilerplate to describe buttons on pages.
 
-The file will be large. 10000 lines is typical. You can filter it by looking for text
-strings and particular @bounds attributes. This gets a record with non-empty text.
-
-For a file to find the non-empty text attributes use
-
-   egrep 'text="[^"]+"' pages/w00001
-
-For the XPath use this
-
-   hlpr xml xpath | egrep '@text='\''.+'\'''
 
 ### Batch Processing
 
@@ -292,6 +323,7 @@ contain the unique text shown to each user.
 
 The text2.xslt properties is just the clickable elements that have some text. These should
 be unique, but are difficult to find.
+
 
 # Android Development on Windows and Linux #
 

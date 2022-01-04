@@ -1,3 +1,11 @@
+# weaves
+
+# Constants for hlpr.sh
+
+# Used by d_xml *s)
+
+e_filetype=".properties"
+
 if [ -z "$d_port" ]
 then
 d_port=4724

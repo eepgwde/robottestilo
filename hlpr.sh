@@ -82,6 +82,19 @@ $1 != mark { print $1, $NF; mark=$1 }'
 	    find $d_dir -type f -name '*.xml' -exec grep -q -s 'android:id=' {} \; -print | \
 		tee ${cmd}.lst
 	    ;;
+	nodes)
+	    : ${d_dir:=./cache}
+	    cat $d_dir/w*-node.properties | awk -F: 'NF > 0 { print $1 }' | sort -u
+	    ;;
+	page-tag)
+	    : ${d_dir:=./pages}
+	    test $# -ge 1 || return 2
+	    grep -l "$1" $d_dir/*.xml1 | sed -n '1p' | while read i
+	    do
+		echo ${i%%.xml1}.xml
+	    done
+	    # cat $d_dir/w*-node.properties | awk -F: 'NF > 0 { print $1 }' | sort -u
+	    ;;
     esac
 }
 	  
@@ -680,6 +693,17 @@ d_xml () {
 	text-empty)
 	    $nodo $xml sel -t -c "//*[*/@text = '']" -n $d_file
 	    ;;
+
+	ios-*)
+	    local cmd1=${cmd##ios-}
+	    case $cmd1 in
+		visible)
+		    $nodo $xml sel -t -c "//*[*/@visible = 'true' and ( @name != '' or @lable != '')]" -n $d_file
+		    ;;
+	    esac
+
+	    ;;
+
 	
 	cmdline)
 	    # "//@index" => all hierarchy 0
@@ -716,7 +740,7 @@ d_xml () {
 	    # use d_xsltp() to do so
 	    : ${d_service:=cache}
 	    test -d "${d_service}" || mkdir -p "${d_service}"
-	    : ${d_port:=.properties}
+	    : ${e_filetype:=.properties}
 
 	    local e_file
 
@@ -734,7 +758,7 @@ d_xml () {
 	    for d_file in ${d_dir}/w*.xml
 	    do
 		tfile=${d_file##*/}; tfile=${tfile%%.xml}
-		d_log=${d_service}/${tfile}-${cmd%%s}${d_port}
+		d_log=${d_service}/${tfile}-${cmd%%s}${e_filetype}
 		echo $tfile $d_file $d_log > $verbose
 
 		case ${cmd} in
