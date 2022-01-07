@@ -137,7 +137,7 @@ d_jq_kv () {
 d_clean () {
     for d_file in $@
     do
-	sed -i -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" $@
+	sed -i -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" $d_file
     done
 }
 

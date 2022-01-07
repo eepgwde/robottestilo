@@ -29,7 +29,9 @@ SYSU ?= systemctl --user
 
 X_RND ?= $$$$
 
-APPIUM_FLAGS ?= -g appium-$(X_RND).log --log-timestamp --local-timezone --log-no-colors --tmp $(TMPDIR) --suppress-adb-kill-server
+X_PORT ?= 4723
+
+APPIUM_FLAGS ?= -g appium-$(X_RND).log -p $(X_PORT) --log-timestamp --local-timezone --log-no-colors --tmp $(TMPDIR) --suppress-adb-kill-server
 
 H_FLAGS ?= 
 H_ ?= hlpr $(H_FLAGS)
