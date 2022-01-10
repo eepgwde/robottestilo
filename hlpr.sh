@@ -641,15 +641,14 @@ d_xml () {
 
     case $cmd in
 	pics) # process all the image files
-	    for d_file in ${d_dir}/w*.xml2
+	    for d_file in ${d_dir}/w*.png
 	    do
 		$FUNCNAME pic
 	    done
 	    ;;
 
 	pic) # process one
-	    local tfile=${d_file%%.*}.png
-	    base64 -d $d_file > $tfile
+	    exo-open $d_file
 	    ;;
 
 	## This should match the appium-boilerplate NewPage.signature method given in .xml1
