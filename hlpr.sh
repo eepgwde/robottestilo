@@ -135,9 +135,10 @@ d_jq_kv () {
 
 # Removes colourisation from log files.
 d_clean () {
+    : ${SED:=sed}
     for d_file in $@
     do
-	sed -i -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" $d_file
+	$SED -i -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" $@
     done
 }
 
@@ -239,7 +240,7 @@ d_app () {
 	    read sid < <(cat ${d_dir}/session.json-id)
 	    echo $sid > $verbose
 
-	    read cmd < <(echo "$@" | sed -e 's,:session_id/,'$sid/',g')
+	    read cmd < <(echo "$@" | sed -e 's,:session_id,'$sid',g')
 	    
 	    
 	    $nodo curl -s $d_options "${d_service}${cmd}" ${d_file+"-f "${d_file}}
@@ -307,8 +308,17 @@ d_app () {
 	    $FUNCNAME cmd2 /session/:session_id/source | jq -r '.value'
 	    ;;
 
+	session-delete)
+	    d_options=DELETE
+	    $FUNCNAME cmd2 /session/:session_id
+	    ;;
+
 	session-list-id)
-	    $FUNCNAME session-list | d_json_pp | jq -r '.value[0].id'
+	    if [ $d_count -lt 0 ]
+	    then
+              d_count=0
+            fi
+	    $FUNCNAME session-list | d_json_pp | jq -r '.value['${d_count}'].id'
 	    ;;
 
 	session-list)

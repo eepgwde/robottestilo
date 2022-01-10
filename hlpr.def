@@ -8,7 +8,7 @@ e_filetype=".properties"
 
 if [ -z "$d_port" ]
 then
-d_port=4724
+d_port=4723
 fi
 
 if [ -z "$d_password" ]
